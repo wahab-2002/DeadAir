@@ -7,10 +7,13 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] CharacterController controller;
     [SerializeField] Transform view;
     [SerializeField] NoteViewer notes;
-    [SerializeField] float walkSpeed = 2.5f;
-    [SerializeField] float mouseSensitivity = 0.12f;
+    [SerializeField] float walkSpeed = 1.8f;
+    [SerializeField] float mouseSensitivity = 0.24f;
+    [SerializeField] float cameraHeight = 1.2f;
     float pitch;
     float verticalSpeed;
+
+    void Awake() { view.localPosition = new Vector3(view.localPosition.x, cameraHeight, view.localPosition.z); }
 
     void OnEnable() { LockCursor(); }
     void OnDisable() { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
