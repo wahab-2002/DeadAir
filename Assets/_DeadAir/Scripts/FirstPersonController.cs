@@ -10,6 +10,7 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] float walkSpeed = 1.8f;
     [SerializeField] float mouseSensitivity = 0.24f;
     [SerializeField] float cameraHeight = 1.2f;
+    public bool Locked { get; set; }
     float pitch;
     float verticalSpeed;
 
@@ -20,7 +21,7 @@ public class FirstPersonController : MonoBehaviour
 
     void Update()
     {
-        if (notes.IsOpen) return;
+        if (notes.IsOpen || Locked) return;
         // Clicking the Game view restores the lock after the Editor releases it.
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame) LockCursor();
         if (Cursor.lockState != CursorLockMode.Locked) return;

@@ -8,7 +8,13 @@ public class RadiatorKnocks : MonoBehaviour
     [SerializeField] Captions captions;
     [SerializeField] RadioChannel radio;
     [SerializeField] AudioClip radiator_knock;
-    bool replying;
+    bool replying, stopped;
+    public bool Stopped => stopped;
+    public void StopForever()
+    {
+        stopped = true; StopAllCoroutines();
+        foreach (AudioSource source in radiators) source.Stop();
+    }
 
     void Start()
     {
@@ -54,7 +60,7 @@ public class RadiatorKnocks : MonoBehaviour
     public void Reply()
     {
         // Rapid repeated bangs still produce one clear three-knock response.
-        if (!replying) StartCoroutine(KnockBack());
+        if (!replying && !stopped) StartCoroutine(KnockBack());
     }
 
     IEnumerator KnockBack()

@@ -4,6 +4,8 @@ using TMPro;
 
 public class PlayerInteraction : MonoBehaviour
 {
+    [SerializeField] SupplyLift supplyLift;
+    [SerializeField] FirstPersonController movement;
     [SerializeField] Camera view;
     [SerializeField] NoteViewer notes;
     [SerializeField] TMP_Text prompt;
@@ -15,9 +17,11 @@ public class PlayerInteraction : MonoBehaviour
     {
         prompt.text = "";
         dot.SetActive(!notes.IsOpen);
-        if (notes.IsOpen || notes.ClosedThisFrame || Cursor.lockState != CursorLockMode.Locked) return;
+        if (movement.Locked || notes.IsOpen || notes.ClosedThisFrame || Cursor.lockState != CursorLockMode.Locked) return;
         Ray ray = new Ray(view.transform.position, view.transform.forward);
         if (!Physics.Raycast(ray, out RaycastHit hit, reach, ~0, QueryTriggerInteraction.Ignore)) return;
+        if (supplyLift.Aim(hit, Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame, Keyboard.current != null && Keyboard.current.eKey.isPressed, out string liftPrompt))
+        { prompt.text = liftPrompt; return; }
         Interactable target = hit.collider.GetComponentInParent<Interactable>();
         if (target == null)
         {

@@ -9,6 +9,15 @@ public class PortableRadio : MonoBehaviour
     [SerializeField] Interactable takeInteraction;
     [SerializeField] Vector3 heldPosition = new Vector3(0.28f, -0.28f, 0.45f);
     [SerializeField] Vector3 halfSize = new Vector3(0.11f, 0.14f, 0.07f);
+    public bool InCar { get; private set; }
+    public void PlaceInCar(Transform mount)
+    {
+        InCar = true; IsHeld = false;
+        transform.SetParent(mount, false);
+        transform.localPosition = Vector3.zero; transform.localRotation = Quaternion.identity;
+        radioCollider.enabled = true; takeInteraction.enabled = true;
+        holdingText.text = "";
+    }
     public bool IsHeld { get; private set; }
 
     public void Reveal() { takeInteraction.enabled = true; }
@@ -16,6 +25,7 @@ public class PortableRadio : MonoBehaviour
     public void Take()
     {
         if (!takeInteraction.enabled || IsHeld) return;
+        InCar = false;
         IsHeld = true;
         radioCollider.enabled = false;
         takeInteraction.enabled = false;

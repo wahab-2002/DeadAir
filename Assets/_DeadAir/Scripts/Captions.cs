@@ -4,6 +4,7 @@ using TMPro;
 
 public class Captions : MonoBehaviour
 {
+    [SerializeField] VoiceLines voices;
     [SerializeField] TMP_Text captionText;
     [SerializeField] GameObject background;
     readonly List<string> messages = new List<string>();
@@ -22,7 +23,7 @@ public class Captions : MonoBehaviour
     }
 
     public void Clear() { messages.Clear(); expiry.Clear(); Refresh(); }
-    public void ShowFrontDoorMessage() { Show("SAM: Not without Lou.", 3); }
+    public void ShowFrontDoorMessage() { voices.Say("sam_04"); }
 
     void Update()
     {

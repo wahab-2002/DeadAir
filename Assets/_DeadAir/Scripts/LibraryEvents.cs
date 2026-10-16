@@ -40,7 +40,7 @@ public class LibraryEvents : MonoBehaviour
         if (!crateHint && entered >= 0 && Time.time - entered >= 45 && radio.State == RadioChannel.ChannelState.LibraryFeed)
         {
             crateHint = true;
-            captions.Show("SAM: Something's glowing under that crate.", 5);
+            radio.GetComponent<VoiceLines>().Say("sam_h1");
         }
         Vector3 offset = player.position - desk.position;
         offset.y = 0;
@@ -62,12 +62,12 @@ public class LibraryEvents : MonoBehaviour
         if (!noiseHint && !tested && Time.time - openStarted >= 40 && !radio.IsBusy)
         {
             noiseHint = true;
-            captions.Show("SAM: If she's holding the button, anything loud near her should come through.", 6);
+            radio.GetComponent<VoiceLines>().Say("sam_h2");
         }
         if (!fallHint && !lift.DoorTouched && Time.time - openStarted >= 80 && !radio.IsBusy)
         {
             fallHint = true;
-            captions.Show("SAM: She said she fell. Fell from where?", 5);
+            radio.GetComponent<VoiceLines>().Say("sam_h3");
         }
     }
 

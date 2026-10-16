@@ -7,17 +7,8 @@ using UnityEngine.InputSystem;
 public class RadioChannel : MonoBehaviour
 {
     public enum ChannelState { LibraryFeed, LouTalking, LouOpenFeed, Silent }
-    [Serializable]
-    public class RadioLine
-    {
-        public string role;
-        public string speaker;
-        [TextArea(2, 5)] public string text;
-        public AudioClip clip;
-        public RadioLine(string role, string speaker, string text)
-        { this.role = role; this.speaker = speaker; this.text = text; }
-    }
-
+    [SerializeField] VoiceLines voiceLines;
+    [SerializeField] SupplyLift supplyLift;
     [SerializeField] ChannelState state = ChannelState.LibraryFeed;
     [SerializeField] Captions captions;
     [SerializeField] NoteViewer notes;
@@ -33,40 +24,17 @@ public class RadioChannel : MonoBehaviour
     [SerializeField] UnityEngine.UI.Image rxLight;
     [SerializeField] float replyWait = 15;
     [SerializeField] float captionInterval = 20;
-    [SerializeField] float echoDelay = 0.15f;
     [SerializeField] float feedbackDistance = 1.5f;
-    [SerializeField] float secondsPerCharacter = 0.06f;
-    [SerializeField] List<RadioLine> lines = new List<RadioLine>
-    {
-        new RadioLine("sam_dead_air", "SAM:", "Lou? I fell asleep. Are you there? Over."),
-        new RadioLine("lou_line_00", "LOU (radio):", "—am? Sam, please. Anyone. Over."),
-        new RadioLine("sam_line_01", "SAM:", "Lou! It's me! I fell asleep. Where are you?"),
-        new RadioLine("lou_line_01", "LOU (radio):", "Sam?! I've been calling for hours. I hid to jump out at you, and then I was falling, and now it's pitch black. I don't know where I am. My flashlight broke."),
-        new RadioLine("sam_line_02", "SAM:", "What's down there with you?"),
-        new RadioLine("lou_line_02", "LOU (radio):", "Boxes, I think. Sheets. And something laughs every time I move."),
-        new RadioLine("lou_that", "LOU (radio):", "That!"),
-        new RadioLine("lou_line_03", "LOU (radio):", "My batteries are almost dead. I'm gonna hold the button down so you can hear what I hear. Find me. Please find me.")
-    };
-    [SerializeField] List<RadioLine> testLines = new List<RadioLine>
-    {
-        new RadioLine("lou_radiator_first", "LOU (radio):", "Was that you? I heard it in the pipe... but it's everywhere."),
-        new RadioLine("lou_radiator_later", "LOU (radio):", "I hear you. Keep going."),
-        new RadioLine("lou_door_thud", "LOU (radio):", "That was far away."),
-        new RadioLine("lou_witch_echo", "LOU (radio):", "The laugh again... no, that one sounded different. Closer."),
-        new RadioLine("lou_battery_last", "LOU (radio):", "That! That's right next to me! Sam, I think that's what I fell out of... the light's blinking... please don't leave me down h—"),
-        new RadioLine("sam_silent_call", "SAM:", "Lou? Lou, can you hear me?")
-    };
-    AudioClip[] testVoices;
+    readonly string[] lines = { "sam_00", "lou_00", "sam_01", "lou_01", "sam_02", "lou_02", "lou_02b", "lou_03" };
+    readonly string[] testLines = { "lou_04", "lou_05", "lou_06", "lou_07", "lou_11", "sam_10" };
     bool[] reactionsPlayed = new bool[4];
     bool batteryEnding;
     public bool BatteryEnding => batteryEnding;
     readonly List<AudioClip> generated = new List<AudioClip>();
     AudioClip libraryLoop, openLoop, click, releaseHiss, squeal, scrape, cackle, background;
-    AudioClip[] voices;
     bool talkHeld, busy, receiving, feedbackPlayed, openWarningShown, breakthrough;
-    bool talkClickPending;
     int nextExchange;
-    float nextReply, nextFeedCaption;
+    float nextReply, nextFeedCaption, nextCall;
     string currentCaption = "";
     float captionUntil;
     public ChannelState State => state;
@@ -74,12 +42,6 @@ public class RadioChannel : MonoBehaviour
 
     void Awake()
     {
-        voices = new AudioClip[lines.Count];
-        for (int i = 0; i < lines.Count; i++)
-            voices[i] = lines[i].clip != null ? lines[i].clip : MakeSound(lines[i].role, Mathf.Max(1.2f, lines[i].text.Length * secondsPerCharacter), "voice");
-        testVoices = new AudioClip[testLines.Count];
-        for (int i = 0; i < testLines.Count; i++)
-            testVoices[i] = testLines[i].clip != null ? testLines[i].clip : MakeSound(testLines[i].role, Mathf.Max(1.2f, testLines[i].text.Length * secondsPerCharacter), "voice");
         libraryLoop = MakeSound("library_feed_hiss_bubbling_ticking", 8, "library");
         openLoop = MakeSound("lou_open_breathing_dripping_roar", 8, "open");
         click = MakeSound("radio_button_click", 0.06f, "click");
@@ -119,6 +81,7 @@ public class RadioChannel : MonoBehaviour
         txLight.color = held && !receiving && !breakthrough && state != ChannelState.LouOpenFeed ? Color.red : new Color(0.25f, 0.06f, 0.06f);
         rxLight.color = receiving || (state == ChannelState.LibraryFeed && !held) ? Color.green : new Color(0.04f, 0.2f, 0.04f);
 
+        if (state == ChannelState.LouTalking && !busy && nextExchange == 0 && Time.time >= nextCall) StartCoroutine(RepeatCall());
         if (state == ChannelState.LouTalking && !busy && !held && nextExchange >= 1 && Time.time >= nextReply)
             StartCoroutine(Exchange());
         if ((state == ChannelState.LibraryFeed || state == ChannelState.LouOpenFeed) && !busy && !held && Time.time >= nextFeedCaption && Time.time >= captionUntil)
@@ -129,23 +92,23 @@ public class RadioChannel : MonoBehaviour
     {
         if ((receiving && state != ChannelState.LouOpenFeed) || busy) return;
         controls.PlayOneShot(click);
+        Cue("[radio: click]");
         if (state == ChannelState.LouOpenFeed)
         {
             // The first blocked attempt explains why; subsequent attempts only click.
             if (!openWarningShown)
             {
                 openWarningShown = true;
-                Say("SAM: She can't hear me while she's holding it.\n[radio: click]", 4);
+                voiceLines.Say("sam_03");
             }
-            else Cue("[radio: click]");
+            else Cue("[Nothing. Her light's still on.]\n[radio: click]");
             return;
         }
         if (state == ChannelState.Silent)
         {
-            StartCoroutine(SilentCall());
+            supplyLift.Talk();
             return;
         }
-        talkClickPending = true;
         if (state == ChannelState.LibraryFeed) StartCoroutine(DeadAirCall());
         else StartCoroutine(Exchange());
     }
@@ -177,7 +140,7 @@ public class RadioChannel : MonoBehaviour
         if (state != ChannelState.LibraryFeed) return;
         StopAllCoroutines();
         StopAudio();
-        talkClickPending = false;
+        voiceLines.Cancel();
         state = ChannelState.LouTalking;
         nextExchange = 0;
         busy = true;
@@ -197,12 +160,21 @@ public class RadioChannel : MonoBehaviour
         controls.Stop();
         captions.Clear();
         Say("", 0);
-        yield return new WaitForSeconds(2);
+        yield return voiceLines.Speak("sam_07");
+        yield return new WaitForSeconds(1.5f);
         receiving = true;
         yield return Speak(1, true);
         receiving = false;
         breakthrough = false;
+        nextCall = Time.time + 10;
         busy = false;
+    }
+
+    IEnumerator RepeatCall()
+    {
+        busy = true; receiving = true;
+        yield return voiceLines.Speak("lou_00", true);
+        receiving = busy = false; nextCall = Time.time + 10;
     }
 
     IEnumerator Exchange()
@@ -247,26 +219,13 @@ public class RadioChannel : MonoBehaviour
 
     IEnumerator Speak(int index, bool lou)
     {
-        AudioClip voice = voices[index];
-        float duration = Mathf.Max(voice.length, lines[index].text.Length * secondsPerCharacter, 1.5f);
-        Say(lines[index].speaker + " " + lines[index].text + (talkClickPending ? "\n[radio: click]" : ""), duration);
-        talkClickPending = false;
-        samVoice.PlayOneShot(voice);
-        if (lou) radioFourVoice.PlayOneShot(voice);
-        else if (state == ChannelState.LouTalking)
+        yield return voiceLines.Speak(lines[index], lou || state == ChannelState.LouTalking);
+        if (!lou && state == ChannelState.LouTalking && !feedbackPlayed && Vector3.Distance(view.position, radioFourVoice.transform.position) <= feedbackDistance)
         {
-            yield return new WaitForSeconds(echoDelay);
-            radioFourVoice.PlayOneShot(voice);
-            if (!feedbackPlayed && Vector3.Distance(view.position, radioFourVoice.transform.position) <= feedbackDistance)
-            {
-                feedbackPlayed = true;
-                radioFourVoice.PlayOneShot(squeal);
-                Cue("[radio #4: feedback squeal; Sam's voice echoes]");
-            }
-            else Cue("[radio #4: Sam's voice echoes]");
-            duration -= echoDelay;
+            feedbackPlayed = true;
+            radioFourVoice.PlayOneShot(squeal);
+            Cue("[radio #4: feedback squeal; Sam's voice echoes]");
         }
-        yield return new WaitForSeconds(Mathf.Max(0, duration));
     }
 
     void StartFeed()
@@ -339,15 +298,7 @@ public class RadioChannel : MonoBehaviour
 
     IEnumerator TestLine(int index, bool lou)
     {
-        RadioLine line = testLines[index];
-        AudioClip voice = testVoices[index];
-        float duration = Mathf.Max(voice.length, line.text.Length * secondsPerCharacter);
-        Say(line.speaker + " " + line.text, duration);
-        samVoice.PlayOneShot(voice);
-        if (!lou) yield return new WaitForSeconds(echoDelay);
-        radioFourVoice.PlayOneShot(voice);
-        if (!lou) captions.Show("[radio #4: Sam's voice echoes]", duration);
-        yield return new WaitForSeconds(duration);
+        yield return voiceLines.Speak(testLines[index], true);
     }
 
     IEnumerator SilentCall()
@@ -383,11 +334,13 @@ public class RadioChannel : MonoBehaviour
     {
         StopAllCoroutines();
         StopAudio();
+        voiceLines.Cancel();
         state = ChannelState.Silent;
-        busy = receiving = breakthrough = talkClickPending = false;
+        busy = receiving = breakthrough = false;
         batteryEnding = false;
         rxLight.color = new Color(0.04f, 0.2f, 0.04f);
         captions.Clear();
+        supplyLift.BatteryDead();
     }
 
     // Generated clips are owned here and released on leaving Play mode.
@@ -406,6 +359,7 @@ public class RadioChannel : MonoBehaviour
         crate.LiftInstantly();
         StopAllCoroutines();
         StopAudio();
+        voiceLines.Cancel();
         state = ChannelState.LouOpenFeed;
         busy = false;
         breakthrough = false;

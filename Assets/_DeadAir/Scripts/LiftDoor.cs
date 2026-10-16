@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class LiftDoor : MonoBehaviour
 {
+    [SerializeField] SupplyLift supplyLift;
     [SerializeField] Transform door, sheet;
     [SerializeField] Collider sheetCollider;
     [SerializeField] Interactable doorInteraction, sheetInteraction;
@@ -15,6 +16,15 @@ public class LiftDoor : MonoBehaviour
     public bool DoorTouched { get; private set; }
     public bool IsRevealed => revealed;
     public bool IsOpen => open;
+    public bool IsMoving => moving;
+    public void Touch() { Rattle("[the lift rattles]"); }
+    public void CloseForCrank() { if (open && !moving) ToggleDoor(); }
+#if UNITY_EDITOR
+    public void RevealInstantly()
+    {
+        revealed = true; sheet.gameObject.SetActive(false); doorInteraction.enabled = true;
+    }
+#endif
 
     void Start()
     {
@@ -45,10 +55,11 @@ public class LiftDoor : MonoBehaviour
 
     public void ToggleDoor()
     {
-        if (!revealed || moving) return;
+        if (!revealed || moving || !supplyLift.AtTop) return;
         DoorTouched = true;
         open = !open;
-        doorInteraction.SetPrompt(open ? "E  Close small door" : "E  Open small door");
+        if (open) supplyLift.DoorOpened();
+        doorInteraction.SetPrompt(open ? "E: Close" : "E: Open");
         Rattle("[the small door rattles]");
         StartCoroutine(MoveDoor());
     }

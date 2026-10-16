@@ -1,0 +1,76 @@
+using System.Collections;
+using UnityEngine;
+using TMPro;
+
+public class LiftEnding : MonoBehaviour
+{
+    [SerializeField] FirstPersonController movement;
+    [SerializeField] PlayerInteraction interaction;
+    [SerializeField] RadioChannel radio;
+    [SerializeField] LibraryEvents library;
+    [SerializeField] VoiceLines voices;
+    [SerializeField] RadiatorKnocks knocks;
+    [SerializeField] Captions captions;
+    [SerializeField] Transform view, lou, door;
+    [SerializeField] AudioSource sting, roomTone;
+    [SerializeField] UnityEngine.UI.Image black;
+    [SerializeField] TMP_Text endText;
+    [SerializeField] GameObject hud;
+    [SerializeField] AudioClip boo_sting;
+    public bool Finished { get; private set; }
+
+    public void Begin()
+    {
+        movement.Locked = true; interaction.enabled = false; radio.enabled = false; library.enabled = false;
+        StartCoroutine(Ending());
+    }
+    IEnumerator Ending()
+    {
+        Quaternion startRotation = view.rotation;
+        Quaternion target = Quaternion.LookRotation(door.position - view.position);
+        float elapsed = 0;
+        while (elapsed < 0.3f)
+        {
+            elapsed += Time.deltaTime; view.rotation = Quaternion.Slerp(startRotation, target, elapsed / 0.3f); yield return null;
+        }
+        yield return new WaitForSeconds(0.2f);
+        if (boo_sting == null) boo_sting = radio.Placeholder("boo_sting", 0.4f, "chime");
+        sting.PlayOneShot(boo_sting); captions.Show("[a sudden sting]", 2);
+        StartCoroutine(voices.Speak("lou_12", true));
+        lou.SetParent(null, true);
+        Vector3 start = lou.position;
+        Vector3 forward = Vector3.ProjectOnPlane(view.forward, Vector3.up).normalized;
+        Vector3 end = view.position + forward * 0.8f; end.y = movement.transform.position.y;
+        Quaternion face = Quaternion.LookRotation(-forward);
+        Vector3 cameraStart = view.localPosition;
+        elapsed = 0;
+        while (elapsed < 0.35f)
+        {
+            elapsed += Time.deltaTime; float t = Mathf.Clamp01(elapsed / 0.35f);
+            lou.position = Vector3.Lerp(start, end, t) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 0.25f;
+            lou.localScale = Vector3.one * Mathf.Lerp(0.6f, 1, t); lou.rotation = face;
+            view.localPosition = cameraStart + (elapsed < 0.25f ? Random.insideUnitSphere * 0.025f : Vector3.zero);
+            yield return null;
+        }
+        lou.position = end; view.localPosition = cameraStart;
+        while (voices.Speaking) yield return null;
+        yield return new WaitForSeconds(0.4f); yield return voices.Speak("lou_13", true);
+        yield return new WaitForSeconds(0.5f); yield return voices.Speak("lou_14", true);
+        yield return new WaitForSeconds(0.5f); yield return voices.Speak("sam_15");
+        knocks.StopForever();
+        foreach (AudioSource source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None)) source.Stop();
+        library.StopAllCoroutines(); radio.StopAllCoroutines();
+        roomTone.clip = radio.Placeholder("faint_room_tone", 4, "hiss"); roomTone.loop = true; roomTone.volume = 0.025f; roomTone.Play();
+        captions.Clear(); captions.Show("[In the walls, the pipes go quiet.]\n[faint room tone]", 4);
+        yield return new WaitForSeconds(2);
+        black.gameObject.SetActive(true); endText.text = "";
+        elapsed = 0;
+        while (elapsed < 2)
+        {
+            elapsed += Time.deltaTime; black.color = new Color(0, 0, 0, Mathf.Clamp01(elapsed / 2)); yield return null;
+        }
+        hud.SetActive(false);
+        endText.text = "Neither of them chickened out."; yield return new WaitForSeconds(3);
+        endText.text = "DEAD AIR"; Finished = true;
+    }
+}
