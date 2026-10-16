@@ -92,5 +92,7 @@ public class LiftEnding : MonoBehaviour
         hud.SetActive(false);
         endText.text = "Neither of them chickened out."; yield return new WaitForSeconds(3);
         endText.text = "DEAD AIR"; Finished = true;
+        yield return new WaitForSeconds(3);
+        yield return FindFirstObjectByType<GameScreens>().ShowCredits();
     }
 }

@@ -31,8 +31,9 @@ public class SupplyLift : MonoBehaviour
     static int requestedShortcut;
 #endif
 
-    void Start()
+    System.Collections.IEnumerator Start()
     {
+        while (!GameScreens.Started) yield return null;
         top = car.position;
         lou.gameObject.SetActive(false);
         if (lift_creak == null) lift_creak = radio.Placeholder("lift_creak", 1, "rattle");
@@ -49,6 +50,7 @@ public class SupplyLift : MonoBehaviour
 
     void Update()
     {
+        if (!GameScreens.Started || GameScreens.Paused) return;
 #if UNITY_EDITOR
         if (Keyboard.current != null)
         {

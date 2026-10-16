@@ -13,8 +13,9 @@ public class SchoolClock : MonoBehaviour
     float started, nextCaption, nextTick;
     AudioClip tick;
     Quaternion minuteStart, hourStart;
-    void Start()
+    System.Collections.IEnumerator Start()
     {
+        while (!GameScreens.Started) yield return null;
         started = Time.time;
         minuteStart = minuteHand.localRotation;
         hourStart = hourHand.localRotation;
@@ -22,6 +23,7 @@ public class SchoolClock : MonoBehaviour
     }
     void Update()
     {
+        if (!GameScreens.Started || GameScreens.Paused || tick == null) return;
         float seconds = 58 * 60 + Time.time - started;
         minuteHand.localRotation = minuteStart * Quaternion.Euler(0, 0, -seconds / 10);
         hourHand.localRotation = hourStart * Quaternion.Euler(0, 0, -330 - seconds / 120);

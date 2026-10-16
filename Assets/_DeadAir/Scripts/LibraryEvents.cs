@@ -22,8 +22,9 @@ public class LibraryEvents : MonoBehaviour
     public bool HasChimed => chimed;
     public bool HasTested => tested;
 
-    void Start()
+    System.Collections.IEnumerator Start()
     {
+        while (!GameScreens.Started) yield return null;
         foreach (Light eye in witchEyes) eye.GetComponent<Renderer>().enabled = false;
         started = Time.time;
         lastPosition = player.position;
@@ -33,6 +34,7 @@ public class LibraryEvents : MonoBehaviour
 
     void Update()
     {
+        if (!GameScreens.Started || GameScreens.Paused) return;
 #if UNITY_EDITOR
         if (Keyboard.current != null && Keyboard.current.f5Key.wasPressedThisFrame) Chime();
 #endif

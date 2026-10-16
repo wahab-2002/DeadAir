@@ -55,10 +55,17 @@ public class RadioChannel : MonoBehaviour
         background = MakeSound("lou_dripping_deep_roar", 2, "background");
     }
 
-    void Start() { AudioListener.volume = 0.67f; if (searchFeedback != null) searchFeedback.clip = Placeholder("radio_feedback", 1, "squeal"); StartFeed(); }
+    System.Collections.IEnumerator Start()
+    {
+        while (!GameScreens.Started) yield return null;
+        AudioListener.volume = 0.67f;
+        if (searchFeedback != null) searchFeedback.clip = Placeholder("radio_feedback", 1, "squeal");
+        StartFeed();
+    }
 
     void Update()
     {
+        if (!GameScreens.Started || GameScreens.Paused) return;
 #if UNITY_EDITOR
         if (Keyboard.current != null)
         {

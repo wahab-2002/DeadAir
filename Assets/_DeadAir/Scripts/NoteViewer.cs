@@ -22,6 +22,7 @@ public class NoteViewer : MonoBehaviour
 
     void Update()
     {
+        if (!GameScreens.InputAllowed) return;
         if (!IsOpen || Time.frameCount == openedFrame || Keyboard.current == null) return;
         if (Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.escapeKey.wasPressedThisFrame)
         {

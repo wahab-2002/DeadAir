@@ -15,6 +15,7 @@ public class PlayerInteraction : MonoBehaviour
 
     void Update()
     {
+        if (!GameScreens.InputAllowed) return;
         prompt.text = "";
         dot.SetActive(!notes.IsOpen);
         if (movement.Locked || notes.IsOpen || notes.ClosedThisFrame || Cursor.lockState != CursorLockMode.Locked) return;

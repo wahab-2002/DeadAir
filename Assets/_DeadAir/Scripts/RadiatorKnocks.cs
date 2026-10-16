@@ -16,8 +16,9 @@ public class RadiatorKnocks : MonoBehaviour
         foreach (AudioSource source in radiators) source.Stop();
     }
 
-    void Start()
+    System.Collections.IEnumerator Start()
     {
+        while (!GameScreens.Started) yield return null;
         if (radiator_knock == null) radiator_knock = radio.Placeholder("pipe_knock", 0.7f, "clank");
         StartCoroutine(RepeatKnocking());
     }

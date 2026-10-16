@@ -21,6 +21,7 @@ public class FirstPersonController : MonoBehaviour
 
     void Update()
     {
+        if (!GameScreens.InputAllowed) return;
         if (notes.IsOpen || Locked) return;
         // Clicking the Game view restores the lock after the Editor releases it.
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame) LockCursor();
