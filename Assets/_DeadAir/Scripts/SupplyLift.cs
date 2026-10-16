@@ -37,7 +37,7 @@ public class SupplyLift : MonoBehaviour
         lou.gameObject.SetActive(false);
         if (lift_creak == null) lift_creak = radio.Placeholder("lift_creak", 1, "rattle");
         if (lift_clunk == null) lift_clunk = radio.Placeholder("lift_clunk", 0.45f, "thud");
-        if (shaft_knock == null) shaft_knock = radio.Placeholder("shaft_knock", 0.3f, "knock");
+        if (shaft_knock == null) shaft_knock = radio.Placeholder("pipe_knock", 0.7f, "clank");
         if (witch_cackle == null) witch_cackle = radio.Placeholder("witch_cackle", 1.2f, "cackle");
         rope.clip = lift_creak; rope.loop = true;
         boiler.clip = radio.Placeholder("boiler_roar_drip", 8, "background"); boiler.loop = true; boiler.Play();
@@ -76,8 +76,7 @@ public class SupplyLift : MonoBehaviour
             nextAmbientCaption = Time.time + 15;
             if (Vector3.Distance(view.position, shaft.transform.position) < boiler.maxDistance && boiler.volume > 0.01f)
                 captions.Show("[faint boiler roar and dripping, below the shaft]", 4);
-            if (Vector3.Distance(view.position, aquarium.transform.position) < aquarium.maxDistance && aquarium.volume > 0.01f)
-                captions.Show("[aquarium bubbling]", 4);
+
         }
     }
 
@@ -197,7 +196,7 @@ public class SupplyLift : MonoBehaviour
         }
         if (LouInside)
         {
-            lou.gameObject.SetActive(true); lou.localScale = Vector3.one * 0.6f;
+            lou.gameObject.SetActive(true); lou.localScale = Vector3.one * 0.7f;
             portable.PlaceInCar(louRadioMount);
         }
         while (voices.Speaking) yield return null;

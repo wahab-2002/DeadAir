@@ -14,6 +14,8 @@ public class LibraryEvents : MonoBehaviour
     [SerializeField] Captions captions;
     [SerializeField] LiftDoor lift;
     [SerializeField] AudioClip witch_cackle, clock_chime;
+    float nextAquariumCaption;
+    [SerializeField] Transform aquarium;
     float started, entered = -1, openStarted = -1, nextWitch, nextLouWitch;
     Vector3 lastPosition;
     bool chimed, tested, crateHint, noiseHint, fallHint;
@@ -34,7 +36,9 @@ public class LibraryEvents : MonoBehaviour
 #if UNITY_EDITOR
         if (Keyboard.current != null && Keyboard.current.f5Key.wasPressedThisFrame) Chime();
 #endif
-        if (!chimed && (Time.time - started >= 120 || Vector3.Distance(player.position, doorway.position) <= 4)) Chime();
+        if (!chimed && (Time.time - started >= 120)) Chime();
+        if (aquarium != null && Vector3.Distance(player.position, aquarium.position) <= 4 && Time.time >= nextAquariumCaption)
+        { captions.Show("[An aquarium bubbles.]", 3); nextAquariumCaption = Time.time + 30; }
         bool inLibrary = player.position.x > 6 && player.position.x < 14 && player.position.z < -1.8f && player.position.z > -11.5f;
         if (inLibrary && entered < 0) entered = Time.time;
         if (!crateHint && entered >= 0 && Time.time - entered >= 45 && radio.State == RadioChannel.ChannelState.LibraryFeed)
@@ -82,16 +86,16 @@ public class LibraryEvents : MonoBehaviour
         chimed = true;
         clock.PlayOneShot(clock_chime);
         if (radio.State == RadioChannel.ChannelState.LibraryFeed)
-            radio.FeedSound(clock_chime, "[a clock chimes midnight: down the corridor, and inside your radio]");
-        else captions.Show("[the library clock chimes midnight]", 5);
+            radio.FeedSound(clock_chime, "[A clock chimes midnight, down the corridor.]\nRADIO: [the same chime]");
+        else captions.Show("[A clock chimes midnight, down the corridor.]", 5);
     }
 
     public void TriggerWitch()
     {
         if (Time.time < nextWitch) return;
-        nextWitch = Time.time + 8;
+        nextWitch = Time.time + 5;
         witch.PlayOneShot(witch_cackle);
-        captions.Show("[the witch cackles]", 3);
+        captions.Show("[The witch cackles.]", 3);
         StartCoroutine(Eyes());
         RadioChannel.ChannelState atTrigger = radio.State;
         if (atTrigger == RadioChannel.ChannelState.LibraryFeed || (atTrigger == RadioChannel.ChannelState.LouOpenFeed && !radio.BatteryEnding))
@@ -110,7 +114,7 @@ public class LibraryEvents : MonoBehaviour
         yield return new WaitForSeconds(atTrigger == RadioChannel.ChannelState.LibraryFeed ? 0.2f : 0.5f);
         if (radio.State != atTrigger || radio.BatteryEnding) yield break;
         bool library = atTrigger == RadioChannel.ChannelState.LibraryFeed;
-        radio.FeedSound(witch_cackle, library ? "[radio: the same cackle]" : "[Lou's radio: a faint, muffled cackle]", library ? 1 : 0.18f);
+        radio.FeedSound(witch_cackle, library ? "RADIO: [the same cackle]" : "[Lou's radio: a faint, muffled cackle]", library ? 1 : 0.18f);
         if (!library)
         {
             MarkTest();

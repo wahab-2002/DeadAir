@@ -27,7 +27,7 @@ public class RadioChannel : MonoBehaviour
     [SerializeField] float feedbackDistance = 1.5f;
     readonly string[] lines = { "sam_00", "lou_00", "sam_01", "lou_01", "sam_02", "lou_02", "lou_02b", "lou_03" };
     readonly string[] testLines = { "lou_04", "lou_05", "lou_06", "lou_07", "lou_11", "sam_10" };
-    bool[] reactionsPlayed = new bool[4];
+    bool[] reactionsPlayed = new bool[7];
     bool batteryEnding;
     public bool BatteryEnding => batteryEnding;
     readonly List<AudioClip> generated = new List<AudioClip>();
@@ -38,7 +38,10 @@ public class RadioChannel : MonoBehaviour
     string currentCaption = "";
     float captionUntil;
     public ChannelState State => state;
-    public bool IsBusy => busy;
+    public bool IsBusy => busy || voiceLines.Speaking;
+    [SerializeField] AudioSource searchFeedback;
+    bool whining, talkAccepted;
+    string warnedLine;
 
     void Awake()
     {
@@ -52,7 +55,7 @@ public class RadioChannel : MonoBehaviour
         background = MakeSound("lou_dripping_deep_roar", 2, "background");
     }
 
-    void Start() { StartFeed(); }
+    void Start() { AudioListener.volume = 0.67f; if (searchFeedback != null) searchFeedback.clip = Placeholder("radio_feedback", 1, "squeal"); StartFeed(); }
 
     void Update()
     {
@@ -78,11 +81,25 @@ public class RadioChannel : MonoBehaviour
         if (held && !talkHeld) BeginTalk();
         if (!held && talkHeld) EndTalk();
         talkHeld = held;
+        if (searchFeedback != null)
+        {
+            float proximity = Mathf.Clamp01(1 - Vector3.Distance(view.position, radioFourVoice.transform.position) / 4);
+            bool whine = state == ChannelState.LibraryFeed && proximity > 0;
+            if (whine && !whining) captions.Show("[Your radio whines.]", 3);
+            whining = whine;
+            searchFeedback.volume = whine ? proximity * 0.3f : 0;
+            searchFeedback.pitch = Mathf.Lerp(0.5f, 1.6f, proximity);
+            if (whine && !searchFeedback.isPlaying) searchFeedback.Play();
+            if (!whine) searchFeedback.Stop();
+        }
         txLight.color = held && !receiving && !breakthrough && state != ChannelState.LouOpenFeed ? Color.red : new Color(0.25f, 0.06f, 0.06f);
-        rxLight.color = receiving || (state == ChannelState.LibraryFeed && !held) ? Color.green : new Color(0.04f, 0.2f, 0.04f);
+        bool louSpeaking = voiceLines.Speaking && voiceLines.CurrentId.StartsWith("lou_");
+        rxLight.color = state == ChannelState.LibraryFeed ? Color.green :
+            held && talkAccepted ? Color.red : state == ChannelState.LouOpenFeed ? Color.green :
+            louSpeaking ? Color.green * (0.65f + 0.35f * Mathf.Abs(Mathf.Sin(Time.time * 23))) : Color.black;
 
         if (state == ChannelState.LouTalking && !busy && nextExchange == 0 && Time.time >= nextCall) StartCoroutine(RepeatCall());
-        if (state == ChannelState.LouTalking && !busy && !held && nextExchange >= 1 && Time.time >= nextReply)
+        if (state == ChannelState.LouTalking && !busy && !voiceLines.Speaking && nextExchange >= 1 && Time.time >= nextReply)
             StartCoroutine(Exchange());
         if ((state == ChannelState.LibraryFeed || state == ChannelState.LouOpenFeed) && !busy && !held && Time.time >= nextFeedCaption && Time.time >= captionUntil)
             ShowFeedCaption();
@@ -90,6 +107,16 @@ public class RadioChannel : MonoBehaviour
 
     public void BeginTalk()
     {
+        talkAccepted = false;
+        if (voiceLines.Speaking)
+        {
+            if (voiceLines.CurrentId.StartsWith("lou_") && warnedLine != voiceLines.CurrentId + voiceLines.Played.Count)
+            {
+                warnedLine = voiceLines.CurrentId + voiceLines.Played.Count;
+                captions.Show("[Lou is still talking.]", 2);
+            }
+            return;
+        }
         if ((receiving && state != ChannelState.LouOpenFeed) || busy) return;
         controls.PlayOneShot(click);
         Cue("[radio: click]");
@@ -104,6 +131,7 @@ public class RadioChannel : MonoBehaviour
             else Cue("[Nothing. Her light's still on.]\n[radio: click]");
             return;
         }
+        talkAccepted = true;
         if (state == ChannelState.Silent)
         {
             supplyLift.Talk();
@@ -115,6 +143,8 @@ public class RadioChannel : MonoBehaviour
 
     void EndTalk()
     {
+        if (!talkAccepted) return;
+        talkAccepted = false;
         if (receiving || breakthrough || state == ChannelState.LouOpenFeed) return;
         if (state == ChannelState.Silent)
         {
@@ -140,6 +170,8 @@ public class RadioChannel : MonoBehaviour
         if (state != ChannelState.LibraryFeed) return;
         StopAllCoroutines();
         StopAudio();
+        controls.PlayOneShot(click);
+        captions.Show("[radio: click; the hiss stops]", 3);
         voiceLines.Cancel();
         state = ChannelState.LouTalking;
         nextExchange = 0;
@@ -184,7 +216,7 @@ public class RadioChannel : MonoBehaviour
         {
             yield return Speak(nextExchange == 0 ? 2 : 4, false);
             // Finish the line and wait for Sam to let go before Lou answers.
-            while (talkHeld) yield return null;
+            while (talkHeld && talkAccepted) yield return null;
             yield return new WaitForSeconds(0.35f);
         }
         receiving = true;
@@ -245,7 +277,7 @@ public class RadioChannel : MonoBehaviour
 
     void ShowFeedCaption()
     {
-        Say(state == ChannelState.LibraryFeed ? "[radio: hiss... bubbling... ticking]" :
+        Say(state == ChannelState.LibraryFeed ? "RADIO: [hiss… bubbling… a clock ticking]" :
             "[Lou's radio, open: breathing... dripping... a deep roar]", 5);
         nextFeedCaption = Time.time + captionInterval;
     }
@@ -281,18 +313,18 @@ public class RadioChannel : MonoBehaviour
     public void ReactToTest(int index)
     {
         if (state != ChannelState.LouOpenFeed || batteryEnding) return;
-        if (index == 0 && reactionsPlayed[0]) index = 1;
-        if (reactionsPlayed[index]) return;
+        if (index != 6 && reactionsPlayed[index]) index = 1;
+        if (index != 6 && reactionsPlayed[index]) return;
         reactionsPlayed[index] = true;
         StartCoroutine(TestReaction(index));
     }
 
     IEnumerator TestReaction(int index)
     {
-        while (busy && !batteryEnding) yield return null;
+        while ((busy || voiceLines.Speaking) && !batteryEnding) yield return null;
         if (state != ChannelState.LouOpenFeed || batteryEnding) yield break;
         busy = true;
-        yield return TestLine(index, true);
+        yield return voiceLines.Speak(index == 4 ? "lou_08" : index == 5 ? "lou_09" : index == 6 ? "lou_10" : testLines[index], true);
         busy = false;
     }
 
@@ -319,7 +351,7 @@ public class RadioChannel : MonoBehaviour
     IEnumerator BatteryDies(AudioClip rattle)
     {
         // Finish any current reaction, then keep the last line uninterrupted.
-        while (busy) yield return null;
+        while (busy || voiceLines.Speaking) yield return null;
         busy = true;
         FeedSound(rattle, "[Lou's radio: loud rattle, close]");
         yield return new WaitForSeconds(rattle.length);
@@ -369,6 +401,9 @@ public class RadioChannel : MonoBehaviour
 
     AudioClip MakeSound(string role, float seconds, string kind)
     {
+        SoundClips sounds = GetComponent<SoundClips>();
+        AudioClip assigned = sounds == null ? null : sounds.Find(role);
+        if (assigned != null) return assigned;
         const int sampleRate = 16000;
         float[] samples = new float[Mathf.CeilToInt(seconds * sampleRate)];
         // A fixed seed makes each placeholder consistent between play sessions.
@@ -382,7 +417,7 @@ public class RadioChannel : MonoBehaviour
             {
                 case "voice": value = noise * (t % 0.06f < 0.043f ? 0.32f : 0.025f) * (0.65f + 0.35f * Mathf.Sin(t * 23)); break;
                 case "library":
-                    value = noise * 0.065f + Mathf.Sin(2 * Mathf.PI * (380 * t + 8 * Mathf.Sin(t * 9))) * Mathf.Pow(Mathf.Max(0, Mathf.Sin(t * 7)), 8) * 0.18f;
+                    value = noise * 0.025f + Mathf.Sin(2 * Mathf.PI * (380 * t + 8 * Mathf.Sin(t * 9))) * Mathf.Pow(Mathf.Max(0, Mathf.Sin(t * 7)), 8) * 0.18f;
                     if (t % 1.6f < 0.035f) value += noise * 0.3f;
                     break;
                 case "open": case "background":

@@ -18,7 +18,7 @@ public class RadiatorKnocks : MonoBehaviour
 
     void Start()
     {
-        if (radiator_knock == null) radiator_knock = radio.Placeholder("radiator_knock", 0.25f, "knock");
+        if (radiator_knock == null) radiator_knock = radio.Placeholder("pipe_knock", 0.7f, "clank");
         StartCoroutine(RepeatKnocking());
     }
 

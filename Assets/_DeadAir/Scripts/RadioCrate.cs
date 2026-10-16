@@ -16,9 +16,9 @@ public class RadioCrate : MonoBehaviour
 
     void LiftCrate(bool instant)
     {
-        if (lifted) return;
+        if (lifted) { GetComponent<NoiseTestObject>().Use(); return; }
         lifted = true;
-        interaction.enabled = false;
+        interaction.SetPrompt("E: Bang");
         redGlow.SetActive(false);
         portableRadio.Reveal();
         channel.FreeChannel(instant ? 0 : slideSeconds);

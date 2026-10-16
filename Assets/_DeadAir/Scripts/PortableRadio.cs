@@ -7,7 +7,7 @@ public class PortableRadio : MonoBehaviour
     [SerializeField] TMP_Text holdingText;
     [SerializeField] Collider radioCollider;
     [SerializeField] Interactable takeInteraction;
-    [SerializeField] Vector3 heldPosition = new Vector3(0.28f, -0.28f, 0.45f);
+    [SerializeField] Vector3 heldPosition = new Vector3(0.10f, -0.12f, 0.22f);
     [SerializeField] Vector3 halfSize = new Vector3(0.11f, 0.14f, 0.07f);
     public bool InCar { get; private set; }
     public void PlaceInCar(Transform mount)
@@ -15,7 +15,7 @@ public class PortableRadio : MonoBehaviour
         InCar = true; IsHeld = false;
         transform.SetParent(mount, false);
         transform.localPosition = Vector3.zero; transform.localRotation = Quaternion.identity;
-        radioCollider.enabled = true; takeInteraction.enabled = true;
+        foreach (Collider item in GetComponentsInChildren<Collider>()) item.enabled = true; takeInteraction.enabled = true;
         holdingText.text = "";
     }
     public bool IsHeld { get; private set; }
@@ -27,7 +27,7 @@ public class PortableRadio : MonoBehaviour
         if (!takeInteraction.enabled || IsHeld) return;
         InCar = false;
         IsHeld = true;
-        radioCollider.enabled = false;
+        foreach (Collider item in GetComponentsInChildren<Collider>()) item.enabled = false;
         takeInteraction.enabled = false;
         transform.SetParent(hand, false);
         transform.localPosition = heldPosition;
@@ -49,7 +49,7 @@ public class PortableRadio : MonoBehaviour
         transform.SetParent(null, true);
         transform.SetPositionAndRotation(hit.point + Vector3.up * (halfSize.y + 0.015f), Quaternion.identity);
         IsHeld = false;
-        radioCollider.enabled = true;
+        foreach (Collider item in GetComponentsInChildren<Collider>()) item.enabled = true;
         takeInteraction.enabled = true;
         holdingText.text = "";
     }

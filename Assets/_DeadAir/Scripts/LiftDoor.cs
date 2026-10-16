@@ -36,6 +36,8 @@ public class LiftDoor : MonoBehaviour
     public void PullSheet()
     {
         if (revealed || moving) return;
+        DoorTouched = true;
+        radio.LoudTest(lift_rattle);
         moving = true;
         sheetInteraction.enabled = false;
         StartCoroutine(Reveal());
@@ -44,7 +46,7 @@ public class LiftDoor : MonoBehaviour
     IEnumerator Reveal()
     {
         sound.PlayOneShot(sheet_rustle);
-        captions.Show("[the black sheet rustles aside]", 3);
+        captions.Show("[The sheet rustles aside.]", 3);
         yield return Slide(sheet, sheet.position + Vector3.left * 1.5f);
         revealed = true;
         sheetCollider.enabled = false;

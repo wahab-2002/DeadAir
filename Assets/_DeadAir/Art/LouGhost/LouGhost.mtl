@@ -1,0 +1,12 @@
+newmtl Sheet
+Kd 0.84 0.82 0.77
+Ks 0 0 0
+newmtl EyeHoles
+Kd 0.02 0.02 0.02
+Ks 0 0 0
+newmtl Inside
+Kd 0.30 0.29 0.27
+Ks 0 0 0
+newmtl Shoes
+Kd 0.10 0.11 0.14
+Ks 0 0 0

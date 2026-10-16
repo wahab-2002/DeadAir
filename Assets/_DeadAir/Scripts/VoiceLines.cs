@@ -57,6 +57,7 @@ public class VoiceLines : MonoBehaviour
         new Line("sam_h6", "She needs something to follow."),
         new Line("sam_h7", "The PTA radio... if she could hear me down there."),
     };
+    public string CurrentId { get; private set; } = "";
     public bool Speaking { get; private set; }
     public readonly List<string> Played = new List<string>();
     public Line Find(string id) { return lines.Find(line => line.id == id); }
@@ -70,6 +71,7 @@ public class VoiceLines : MonoBehaviour
     {
         while (Speaking) yield return null;
         Speaking = true;
+        CurrentId = id;
         Line line = Find(id);
         AudioClip clip = Clip(id);
         float duration = Mathf.Max(clip.length, line.caption.Length * 0.06f);

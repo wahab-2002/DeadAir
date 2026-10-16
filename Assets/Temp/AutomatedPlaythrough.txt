@@ -1,0 +1,80 @@
+26.87 Wake
+32.08 Walk (2.50, 0.05, 3.00) reached (2.49, 0.02, 3.02)
+35.20 Walk (2.50, 0.05, 0.00) reached (2.50, 0.02, -0.08)
+39.32 Walk (10.00, 0.05, 0.00) reached (10.07, 0.02, 0.00)
+42.67 Walk (10.00, 0.05, -6.00) reached (10.00, 0.05, -6.03)
+43.42 Walk (8.80, 0.05, -6.50) reached (8.73, 0.05, -6.53)
+45.16 Walk (8.80, 0.05, -9.60) reached (8.80, 0.02, -9.64)
+46.13 Walk (7.00, 0.05, -9.60) reached (7.05, 0.02, -9.60)
+46.13 Feedback search reached crates
+48.60 Noise tested Pumpkin bread crate 1
+51.08 Noise tested Pumpkin bread crate 2
+13.04 Wake
+18.41 Walk (2.50, 0.05, 3.00) reached (2.52, 0.02, 2.92)
+19.93 Walk (2.50, 0.05, 0.00) reached (2.50, 0.02, 0.01)
+24.25 Walk (10.00, 0.05, 0.00) reached (10.08, 0.02, 0.00)
+27.50 Walk (10.00, 0.05, -6.00) reached (10.00, 0.05, -6.03)
+28.26 Walk (8.80, 0.05, -6.50) reached (8.73, 0.05, -6.53)
+29.99 Walk (8.80, 0.05, -9.60) reached (8.80, 0.02, -9.64)
+30.96 Walk (7.00, 0.05, -9.60) reached (7.05, 0.02, -9.60)
+30.96 Feedback search reached crates
+33.44 Noise tested Pumpkin bread crate 1
+35.99 Noise tested Pumpkin bread crate 2
+43.81 Breakthrough finished
+58.82 Exchange one complete
+67.78 Exchange two complete
+76.68 Open feed LouOpenFeed
+82.09 Noise tested Radiator under window
+85.14 Noise tested Room 11 locked door
+88.27 Noise tested Room 14 locked door
+94.22 Witch tested
+97.25 Noise tested Desk bell
+99.29 Noise tested Front library shelf 0
+102.32 Noise tested Bake-sale crate
+104.28 Noise tested Shelf block
+106.77 Noise tested Decoy sheet 0
+109.46 Noise tested Decoy sheet 1
+119.40 Lift test Silent
+125.04 Walk (9.10, 0.05, -9.60) reached (9.06, 0.03, -9.60)
+125.70 Walk (10.00, 0.05, -10.25) reached (10.03, 0.02, -10.27)
+129.73 Goal played True
+135.35 Radio lowered
+139.49 Beacon stage 1
+142.84 Beacon stage 2
+145.33 Beacon stage 3
+152.77 Lou raised
+4.78 Wake
+9.95 Walk (2.50, 0.05, 3.00) reached (2.49, 0.02, 3.04)
+11.78 Walk (2.50, 0.05, 0.00) reached (2.50, 0.02, -0.07)
+19.46 Walk (10.00, 0.05, 0.00) reached (10.08, 0.02, 0.00)
+22.74 Walk (10.00, 0.05, -6.00) reached (10.00, 0.05, -6.06)
+23.60 Walk (8.80, 0.05, -6.50) reached (8.73, 0.05, -6.53)
+25.23 Walk (8.80, 0.05, -9.60) reached (8.80, 0.02, -9.63)
+26.20 Walk (7.00, 0.05, -9.60) reached (7.05, 0.02, -9.60)
+26.20 Feedback search reached crates
+28.68 Noise tested Pumpkin bread crate 1
+31.16 Noise tested Pumpkin bread crate 2
+39.04 Breakthrough finished
+54.10 Exchange one complete
+63.07 Exchange two complete
+71.94 Open feed LouOpenFeed
+77.39 Noise tested Radiator under window
+80.41 Noise tested Room 11 locked door
+83.54 Noise tested Room 14 locked door
+89.49 Witch tested
+92.52 Noise tested Desk bell
+94.47 Noise tested Front library shelf 0
+97.49 Noise tested Bake-sale crate
+99.44 Noise tested Shelf block
+103.35 Noise tested Decoy sheet 0
+105.83 Noise tested Decoy sheet 1
+115.67 Lift test Silent
+121.44 Walk (9.10, 0.05, -9.60) reached (9.05, 0.02, -9.60)
+122.08 Walk (10.00, 0.05, -10.25) reached (10.01, 0.02, -10.26)
+126.08 Goal played True
+131.64 Radio lowered
+135.75 Beacon stage 1
+139.11 Beacon stage 2
+141.60 Beacon stage 3
+149.02 Lou raised
+165.18 DEAD AIR reached. Lines: sam_00,sam_05,sam_05,sam_07,lou_00,sam_01,lou_01,sam_02,lou_02,lou_02b,lou_03,lou_04,lou_06,lou_05,lou_07,lou_08,lou_09,sam_06,lou_10,sam_06,lou_10,lou_11,sam_10,sam_11,sam_12,sam_13,sam_14,lou_12,lou_13,lou_14,sam_15
