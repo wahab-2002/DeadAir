@@ -13,6 +13,7 @@ public class LiftDoor : MonoBehaviour
     [SerializeField] AudioClip lift_rattle, sheet_rustle;
     Vector3 closedPosition;
     bool revealed, open, moving;
+    public Transform Hatch => door;
     public bool DoorTouched { get; private set; }
     public bool IsRevealed => revealed;
     public bool IsOpen => open;
@@ -47,12 +48,25 @@ public class LiftDoor : MonoBehaviour
     {
         sound.PlayOneShot(sheet_rustle);
         captions.Show("[The sheet rustles aside.]", 3);
-        yield return Slide(sheet, sheet.position + Vector3.left * 1.5f);
+        yield return DropSheet();
         revealed = true;
         sheetCollider.enabled = false;
         doorInteraction.enabled = true;
         moving = false;
         Rattle("[the sheet bumps the small door: a wooden rattle]");
+    }
+
+    IEnumerator DropSheet()
+    {
+        Vector3 start = sheet.position, size = sheet.localScale;
+        Vector3 end = new Vector3(start.x, 0.035f, start.z);
+        for (float t = 0; t < 0.7f; t += Time.deltaTime)
+        {
+            sheet.position = Vector3.Lerp(start, end, t / 0.7f);
+            sheet.localScale = Vector3.Lerp(size, new Vector3(size.x, 0.06f, 0.35f), t / 0.7f);
+            yield return null;
+        }
+        sheet.position = end; sheet.localScale = new Vector3(size.x, 0.06f, 0.35f);
     }
 
     public void ToggleDoor()
@@ -70,7 +84,7 @@ public class LiftDoor : MonoBehaviour
     {
         moving = true;
         // A sliding placeholder hatch keeps the tiny opening clear.
-        yield return Slide(door, closedPosition + (open ? Vector3.right * 0.7f : Vector3.zero));
+        yield return Slide(door, closedPosition + (open ? door.right * 0.7f + door.forward * 0.18f : Vector3.zero));
         moving = false;
     }
 

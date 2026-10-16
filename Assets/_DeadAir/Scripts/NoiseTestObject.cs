@@ -12,7 +12,28 @@ public class NoiseTestObject : MonoBehaviour
     [SerializeField] AudioSource sound;
     [SerializeField] bool locked;
     [SerializeField] AudioClip localClip;
-    float nextBang;
+    [SerializeField] Transform liftDoor;
+    [SerializeField] bool inPuzzleRoom, throughWall;
+    float nextBang, wallHintAt = -1;
+    bool wallHintPlayed;
+    public int Level
+    {
+        get
+        {
+            if (kind == Kind.Radiator) return 0;
+            if (kind == Kind.Decoy) return 6;
+            float distance = Vector3.Distance(transform.position, liftDoor.position);
+            if (throughWall && distance <= 2.5f) return 6;
+            if (!inPuzzleRoom) return 2;
+            if (distance >= 6) return 4;
+            return 5;
+        }
+    }
+    void Update()
+    {
+        if (wallHintAt >= 0 && !wallHintPlayed && !RoomVisit.EnteredBookRoom && Time.time >= wallHintAt && !radio.IsBusy && !radio.GetComponent<VoiceLines>().Played.Contains("sam_h8"))
+        { wallHintPlayed = true; radio.GetComponent<VoiceLines>().Say("sam_h8"); }
+    }
 
     void Start()
     {
@@ -35,7 +56,8 @@ public class NoiseTestObject : MonoBehaviour
     {
         yield return new WaitForSeconds(0.4f);
         if (radio.State != RadioChannel.ChannelState.LouOpenFeed || radio.BatteryEnding) yield break;
-        int level = kind == Kind.Radiator ? 0 : kind == Kind.Near || kind == Kind.Bell ? 4 : kind == Kind.Warm ? 5 : kind == Kind.Decoy ? 6 : 2;
+        int level = Level;
+        if (throughWall && level == 6 && wallHintAt < 0) wallHintAt = Time.time + localClip.length + 20;
         string description = level == 0 ? "a faint pipe knock" : level == 2 ? "faint and muffled" : level == 4 ? "clearer, still not loud" : level == 5 ? "clear and close" : "a clear rustle";
         radio.FeedSound(localClip, "RADIO: [" + description + "]", level == 0 || level == 2 ? 0.18f : level == 4 ? 0.4f : 0.75f);
         if (kind == Kind.Radiator) knocks.Reply();

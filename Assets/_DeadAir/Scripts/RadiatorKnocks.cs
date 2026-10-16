@@ -8,6 +8,7 @@ public class RadiatorKnocks : MonoBehaviour
     [SerializeField] Captions captions;
     [SerializeField] RadioChannel radio;
     [SerializeField] AudioClip radiator_knock;
+    public float LastAmbientKnocksAt { get; private set; } = -1;
     bool replying, stopped;
     public bool Stopped => stopped;
     public void StopForever()
@@ -27,12 +28,11 @@ public class RadiatorKnocks : MonoBehaviour
     {
         while (true)
         {
-            float next = Time.time + Random.Range(25f, 35f);
+            float next = Time.time + Random.Range(40f, 60f);
             if (!replying)
             {
                 yield return Three(false);
-                yield return new WaitForSeconds(1);
-                if (!replying) yield return Three(false);
+
             }
             while (Time.time < next) yield return null;
         }
@@ -40,11 +40,12 @@ public class RadiatorKnocks : MonoBehaviour
 
     IEnumerator Three(bool reply)
     {
+        if (!reply) LastAmbientKnocksAt = Time.time;
         bool near = false;
         foreach (AudioSource source in radiators)
             if (Vector3.Distance(player.position, source.transform.position) <= 6) near = true;
-        captions.Show(reply ? "[three knocks back, through every radiator]" :
-            near ? "[three knocks, inside the radiator]" : "[knocking, somewhere in the walls]", 3);
+        if (reply) captions.Show("[three knocks back, through every radiator]", 3);
+        else captions.Ambient(near ? "[three knocks, inside the radiator]" : "[knocking, somewhere in the walls]", 3);
         for (int i = 0; i < 3; i++)
         {
             if (!reply && replying) yield break;

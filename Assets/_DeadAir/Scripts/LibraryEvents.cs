@@ -34,13 +34,13 @@ public class LibraryEvents : MonoBehaviour
 
     void Update()
     {
-        if (!GameScreens.Started || GameScreens.Paused) return;
+        if (!GameScreens.Started || GameScreens.Paused || witch_cackle == null) return;
 #if UNITY_EDITOR
         if (Keyboard.current != null && Keyboard.current.f5Key.wasPressedThisFrame) Chime();
 #endif
         if (!chimed && (Time.time - started >= 120)) Chime();
         if (aquarium != null && Vector3.Distance(player.position, aquarium.position) <= 4 && Time.time >= nextAquariumCaption)
-        { captions.Show("[An aquarium bubbles.]", 3); nextAquariumCaption = Time.time + 30; }
+        { captions.Ambient("[An aquarium bubbles.]", 3); nextAquariumCaption = Time.time + 30; }
         bool inLibrary = player.position.x > 6 && player.position.x < 14 && player.position.z < -1.8f && player.position.z > -11.5f;
         if (inLibrary && entered < 0) entered = Time.time;
         if (!crateHint && entered >= 0 && Time.time - entered >= 45 && radio.State == RadioChannel.ChannelState.LibraryFeed)
@@ -62,7 +62,7 @@ public class LibraryEvents : MonoBehaviour
         if (radio.BatteryEnding) return;
         if (Time.time >= nextLouWitch && !radio.IsBusy)
         {
-            radio.FeedSound(witch_cackle, "[Lou's radio: cackling laughter]", 0.22f);
+            radio.FeedSound(witch_cackle, "[Lou's radio: cackling laughter]", 0.22f, true);
             nextLouWitch = Time.time + Random.Range(30f, 45f);
         }
         if (!noiseHint && !tested && Time.time - openStarted >= 40 && !radio.IsBusy)

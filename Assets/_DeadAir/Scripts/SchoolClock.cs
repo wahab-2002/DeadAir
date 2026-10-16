@@ -31,6 +31,6 @@ public class SchoolClock : MonoBehaviour
         if (!audible) return;
         if (Time.time >= nextTick) { nextTick = Time.time + 1; sound.PlayOneShot(tick, 0.2f); }
         if (Vector3.Distance(player.position, transform.position) <= 4 && Time.time >= nextCaption)
-        { captions.Show("[A clock ticks.]", 3); nextCaption = Time.time + 30; }
+        { captions.Ambient("[A clock ticks.]", 3); nextCaption = Time.time + 30; }
     }
 }

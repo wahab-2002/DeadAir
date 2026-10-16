@@ -24,7 +24,13 @@ public class GameScreens : MonoBehaviour
         pause.gameObject.SetActive(false); credits.gameObject.SetActive(false);
         hud.SetActive(false); movement.Locked = true;
     }
-    void Start() { SetCursor(true); titleHiss.Play(); }
+    void Start()
+    {
+        SetCursor(true);
+        foreach (AudioSource source in FindObjectsByType<AudioSource>(FindObjectsInactive.Include, FindObjectsSortMode.None)) source.Stop();
+        titleHiss.clip = FindFirstObjectByType<RadioChannel>().Placeholder("faint_room_tone", 4, "hiss");
+        titleHiss.volume = 0.025f; titleHiss.loop = true; titleHiss.Play();
+    }
     void Update()
     {
         if (!Started || fading || ended || ending.Finished) return;

@@ -77,7 +77,7 @@ public class SupplyLift : MonoBehaviour
         {
             nextAmbientCaption = Time.time + 15;
             if (Vector3.Distance(view.position, shaft.transform.position) < boiler.maxDistance && boiler.volume > 0.01f)
-                captions.Show("[faint boiler roar and dripping, below the shaft]", 4);
+                captions.Ambient("[faint boiler roar and dripping, below the shaft]", 4);
 
         }
     }
@@ -222,7 +222,7 @@ public class SupplyLift : MonoBehaviour
     {
         radio.JumpToOpenFeed(); radio.GoSilent(); door.RevealInstantly();
         CharacterController controller = player.GetComponent<CharacterController>();
-        controller.enabled = false; player.SetPositionAndRotation(new Vector3(10, 0.05f, -9.7f), Quaternion.Euler(0, 180, 0));
+        controller.enabled = false; player.SetPositionAndRotation(door.Hatch.position + door.Hatch.forward * 1.8f + Vector3.down * (door.Hatch.position.y - 0.05f), Quaternion.LookRotation(-door.Hatch.forward));
         view.localRotation = Quaternion.identity; controller.enabled = true;
         if (ready)
         {

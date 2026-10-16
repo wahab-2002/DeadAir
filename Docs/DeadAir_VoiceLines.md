@@ -35,12 +35,12 @@ Lou's lines always come through a radio. Sam's lines are spoken aloud; when Sam 
 | sam_03 | "She can't hear me while she's holding it." | First Talk during the open feed. Later Talks: caption only, "[Nothing. Her light's still on.]" |
 | sam_04 | "Not without Lou." | Using the front doors. |
 | sam_05 | "Just pumpkin bread." | Lifting a decoy crate. |
-| sam_06 | "Just a wall." | Pulling a decoy sheet. |
+| sam_06 | "Just a wall." | Not used since Playtest 3 (the decoy sheets now cover props and get a caption instead). |
 | sam_07 | "Mom's PTA radio. It was stuck on talk the whole time." | Lifting the real crate, as the hiss cuts out. |
 | sam_08 | "Lou's candy pail. She was in here." | First look at Lou's pail in the lift car. |
 | sam_09 | "If I go down too, there's nobody to crank us back up." | Trying to climb into the lift car. |
 | sam_10 | "Lou? Lou, can you hear me?" | 2 s after Lou's battery dies, then on any Talk while the channel is Silent and the beacon isn't set up. |
-| sam_11 | "She's at the bottom of that lift. I have to get her up." | The first time the lift door is open after Lou's battery died. |
+| sam_11 | "She's at the bottom of that lift. I have to get her up." | The first time the lift door is open after Lou's battery died. The lift is in the Book Room, beside the library. |
 | sam_12 | "Lou! The cupboard's back! Follow my voice!" | Beacon Talk 1 (radio #4 in the car at the bottom). |
 | sam_13 | "Keep coming! You're close!" | Beacon Talk 2. |
 | sam_14 | "Climb in. I'll pull you up." | Beacon Talk 3. |
@@ -57,6 +57,7 @@ Lou's lines always come through a radio. Sam's lines are spoken aloud; when Sam 
 | sam_h5 | "She can't see it. It's pitch black down there." | 20 s after the empty car first reaches the bottom. |
 | sam_h6 | "She needs something to follow." | 45 s after the same. |
 | sam_h7 | "The PTA radio... if she could hear me down there." | 75 s after the same. |
+| sam_h8 | "It's coming from the other side of this wall." | 20 s after the first "through the wall" reaction from the library shelf behind the lift, if the player hasn't entered the Book Room. |
 
 Hints `sam_h5`–`sam_h7` stop once the beacon has started.
 

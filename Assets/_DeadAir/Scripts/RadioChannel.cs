@@ -43,8 +43,10 @@ public class RadioChannel : MonoBehaviour
     bool whining, talkAccepted;
     string warnedLine;
 
+    float originalFeedVolume;
     void Awake()
     {
+        originalFeedVolume = samFeed.volume;
         libraryLoop = MakeSound("library_feed_hiss_bubbling_ticking", 8, "library");
         openLoop = MakeSound("lou_open_breathing_dripping_roar", 8, "open");
         click = MakeSound("radio_button_click", 0.06f, "click");
@@ -115,6 +117,7 @@ public class RadioChannel : MonoBehaviour
     public void BeginTalk()
     {
         talkAccepted = false;
+        if (Time.time < voiceLines.TalkAllowedAt) return;
         if (voiceLines.Speaking)
         {
             if (voiceLines.CurrentId.StartsWith("lou_") && warnedLine != voiceLines.CurrentId + voiceLines.Played.Count)
@@ -271,6 +274,7 @@ public class RadioChannel : MonoBehaviour
     {
         receiving = state == ChannelState.LouOpenFeed;
         samFeed.clip = receiving ? openLoop : libraryLoop;
+        samFeed.volume = 0.5f * originalFeedVolume;
         samFeed.loop = true;
         samFeed.Play();
         if (receiving)
@@ -284,7 +288,7 @@ public class RadioChannel : MonoBehaviour
 
     void ShowFeedCaption()
     {
-        Say(state == ChannelState.LibraryFeed ? "RADIO: [hiss… bubbling… a clock ticking]" :
+        captions.Ambient(state == ChannelState.LibraryFeed ? "RADIO: [hiss… bubbling… a clock ticking]" :
             "[Lou's radio, open: breathing... dripping... a deep roar]", 5);
         nextFeedCaption = Time.time + captionInterval;
     }
@@ -309,12 +313,13 @@ public class RadioChannel : MonoBehaviour
     }
 
     // Only feed sounds reach the receiving radios. Sam remains unable to transmit.
-    public void FeedSound(AudioClip clip, string caption, float volume = 1)
+    public void FeedSound(AudioClip clip, string caption, float volume = 1, bool ambient = false)
     {
         if (state != ChannelState.LibraryFeed && state != ChannelState.LouOpenFeed) return;
         samVoice.PlayOneShot(clip, volume);
         if (state == ChannelState.LouOpenFeed) radioFourVoice.PlayOneShot(clip, volume);
-        captions.Show(caption, Mathf.Max(3, clip.length));
+        if (ambient) captions.Ambient(caption, Mathf.Max(3, clip.length));
+        else captions.Show(caption, Mathf.Max(3, clip.length));
     }
 
     public void ReactToTest(int index)

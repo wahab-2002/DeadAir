@@ -56,7 +56,9 @@ public class VoiceLines : MonoBehaviour
         new Line("sam_h5", "She can't see it. It's pitch black down there."),
         new Line("sam_h6", "She needs something to follow."),
         new Line("sam_h7", "The PTA radio... if she could hear me down there."),
+        new Line("sam_h8", "It's coming from the other side of this wall."),
     };
+    public float TalkAllowedAt { get; private set; }
     public string CurrentId { get; private set; } = "";
     public bool Speaking { get; private set; }
     public readonly List<string> Played = new List<string>();
@@ -76,10 +78,11 @@ public class VoiceLines : MonoBehaviour
         AudioClip clip = Clip(id);
         float duration = Mathf.Max(clip.length, line.caption.Length * 0.06f);
         Played.Add(id);
-        captions.Show((id.StartsWith("lou_") ? "LOU (radio): " : "SAM: ") + line.caption, duration);
+        captions.Dialogue((id.StartsWith("lou_") ? "LOU (radio): " : "SAM: ") + line.caption, duration + 1);
         localVoice.PlayOneShot(clip);
         if (transmit || id.StartsWith("lou_")) radioVoice.PlayOneShot(clip);
         yield return new WaitForSeconds(duration);
+        if (id.StartsWith("lou_")) TalkAllowedAt = Time.time + 1.5f;
         Speaking = false;
     }
     public void Cancel() { StopAllCoroutines(); Speaking = false; }
