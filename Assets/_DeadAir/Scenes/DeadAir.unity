@@ -93874,56 +93874,56 @@ MonoBehaviour:
   radioVoice: {fileID: 1974271247}
   lines:
   - id: lou_00
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 186eaf531e12646bba2c5a82fe47da50, type: 3}
     caption: "\u2014am? Sam, please. Anyone. Over."
   - id: lou_01
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 39917c861e9784d5c81227de7fb1abc8, type: 3}
     caption: Sam?! I've been calling for hours. I hid to jump out at you, and then
       I was falling, and now it's pitch black. I don't know where I am. My flashlight
       broke.
   - id: lou_02
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: c7003b20272114e758c308f3cf434c57, type: 3}
     caption: Boxes, I think. Sheets. And something laughs every time I move.
   - id: lou_02b
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: a6bd57703f7464cfeae4ad331972ebca, type: 3}
     caption: That!
   - id: lou_03
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e2a768b54dabc433f81dc740774a0e88, type: 3}
     caption: My battery is almost dead. I'm gonna hold the button down so you can
       hear what I hear. Bang on stuff, Sam. I'll tell you if it's close.
   - id: lou_04
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 105ab39167c81486fb24fd419dc4a7db, type: 3}
     caption: "Was that you? I heard it in the pipes\u2026 but it's everywhere."
   - id: lou_05
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 74e2107e753234fb993a21cd846cdacc, type: 3}
     caption: I hear you, Sam. Keep going.
   - id: lou_06
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 89cb31e45b9974c5d9cd4f7005e534a9, type: 3}
     caption: That was far away.
   - id: lou_07
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: c5bb22891922349ab8dc006f6b41ea4c, type: 3}
     caption: The laugh again... no, that one sounded different. Closer.
   - id: lou_08
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 61893684fba7140159292691928e232e, type: 3}
     caption: Closer... I think.
   - id: lou_09
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 4c24202e502cc4f79ab4f2b0744e79fc, type: 3}
     caption: Warmer.
   - id: lou_10
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 73b8cedbd03014179b4168197272cd8d, type: 3}
     caption: Close... but not there.
   - id: lou_11
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: ba0255b50e9e0437eae88aba73ccfa7b, type: 3}
     caption: "That! That's right next to me! Sam, I think that's what I fell out
       of... the light's blinking... please don't leave me down h\u2014"
   - id: lou_12
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 8a7c39710b98d488da44ac811a950cfb, type: 3}
     caption: BOO!
   - id: lou_13
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: c9ba46a9ab2924ebba627daabafabeb9, type: 3}
     caption: Got you.
   - id: lou_14
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 594d8c5340a17430abb25958b3a52b7e, type: 3}
     caption: Did you get the Knocking Ghost on tape?
   - id: sam_00
     clip: {fileID: 0}
