@@ -47,6 +47,19 @@ public class RadioChannel : MonoBehaviour
         new RadioLine("lou_that", "LOU (radio):", "That!"),
         new RadioLine("lou_line_03", "LOU (radio):", "My batteries are almost dead. I'm gonna hold the button down so you can hear what I hear. Find me. Please find me.")
     };
+    [SerializeField] List<RadioLine> testLines = new List<RadioLine>
+    {
+        new RadioLine("lou_radiator_first", "LOU (radio):", "Was that you? I heard it in the pipe... but it's everywhere."),
+        new RadioLine("lou_radiator_later", "LOU (radio):", "I hear you. Keep going."),
+        new RadioLine("lou_door_thud", "LOU (radio):", "That was far away."),
+        new RadioLine("lou_witch_echo", "LOU (radio):", "The laugh again... no, that one sounded different. Closer."),
+        new RadioLine("lou_battery_last", "LOU (radio):", "That! That's right next to me! Sam, I think that's what I fell out of... the light's blinking... please don't leave me down h—"),
+        new RadioLine("sam_silent_call", "SAM:", "Lou? Lou, can you hear me?")
+    };
+    AudioClip[] testVoices;
+    bool[] reactionsPlayed = new bool[4];
+    bool batteryEnding;
+    public bool BatteryEnding => batteryEnding;
     readonly List<AudioClip> generated = new List<AudioClip>();
     AudioClip libraryLoop, openLoop, click, releaseHiss, squeal, scrape, cackle, background;
     AudioClip[] voices;
@@ -64,6 +77,9 @@ public class RadioChannel : MonoBehaviour
         voices = new AudioClip[lines.Count];
         for (int i = 0; i < lines.Count; i++)
             voices[i] = lines[i].clip != null ? lines[i].clip : MakeSound(lines[i].role, Mathf.Max(1.2f, lines[i].text.Length * secondsPerCharacter), "voice");
+        testVoices = new AudioClip[testLines.Count];
+        for (int i = 0; i < testLines.Count; i++)
+            testVoices[i] = testLines[i].clip != null ? testLines[i].clip : MakeSound(testLines[i].role, Mathf.Max(1.2f, testLines[i].text.Length * secondsPerCharacter), "voice");
         libraryLoop = MakeSound("library_feed_hiss_bubbling_ticking", 8, "library");
         openLoop = MakeSound("lou_open_breathing_dripping_roar", 8, "open");
         click = MakeSound("radio_button_click", 0.06f, "click");
@@ -91,6 +107,7 @@ public class RadioChannel : MonoBehaviour
             }
             if (Keyboard.current.f2Key.wasPressedThisFrame) crate.LiftInstantly();
             if (Keyboard.current.f3Key.wasPressedThisFrame) JumpToOpenFeed();
+            if (Keyboard.current.f4Key.wasPressedThisFrame) GoSilent();
         }
 #endif
         bool held = (Keyboard.current != null && Keyboard.current.qKey.isPressed) ||
@@ -104,13 +121,13 @@ public class RadioChannel : MonoBehaviour
 
         if (state == ChannelState.LouTalking && !busy && !held && nextExchange >= 1 && Time.time >= nextReply)
             StartCoroutine(Exchange());
-        if ((state == ChannelState.LibraryFeed || state == ChannelState.LouOpenFeed) && !busy && !held && Time.time >= nextFeedCaption)
+        if ((state == ChannelState.LibraryFeed || state == ChannelState.LouOpenFeed) && !busy && !held && Time.time >= nextFeedCaption && Time.time >= captionUntil)
             ShowFeedCaption();
     }
 
     public void BeginTalk()
     {
-        if ((receiving && state != ChannelState.LouOpenFeed) || busy || state == ChannelState.Silent) return;
+        if ((receiving && state != ChannelState.LouOpenFeed) || busy) return;
         controls.PlayOneShot(click);
         if (state == ChannelState.LouOpenFeed)
         {
@@ -123,6 +140,11 @@ public class RadioChannel : MonoBehaviour
             else Cue("[radio: click]");
             return;
         }
+        if (state == ChannelState.Silent)
+        {
+            StartCoroutine(SilentCall());
+            return;
+        }
         talkClickPending = true;
         if (state == ChannelState.LibraryFeed) StartCoroutine(DeadAirCall());
         else StartCoroutine(Exchange());
@@ -130,7 +152,13 @@ public class RadioChannel : MonoBehaviour
 
     void EndTalk()
     {
-        if (receiving || breakthrough || state == ChannelState.LouOpenFeed || state == ChannelState.Silent) return;
+        if (receiving || breakthrough || state == ChannelState.LouOpenFeed) return;
+        if (state == ChannelState.Silent)
+        {
+            controls.PlayOneShot(click);
+            Cue("[radio: click]");
+            return;
+        }
         controls.PlayOneShot(click);
         controls.PlayOneShot(releaseHiss);
         Cue("[radio: click, short hiss]");
@@ -167,6 +195,7 @@ public class RadioChannel : MonoBehaviour
             yield return new WaitForSeconds(slideSeconds);
         }
         controls.Stop();
+        captions.Clear();
         Say("", 0);
         yield return new WaitForSeconds(2);
         receiving = true;
@@ -272,7 +301,7 @@ public class RadioChannel : MonoBehaviour
     void Cue(string cue)
     {
         float remaining = captionUntil - Time.time;
-        captions.Show((remaining > 0 ? currentCaption + "\n" : "") + cue, Mathf.Max(1.2f, remaining));
+        captions.Show(cue, Mathf.Max(1.2f, remaining));
     }
 
     void PlayBoth(AudioClip clip)
@@ -280,6 +309,90 @@ public class RadioChannel : MonoBehaviour
         samVoice.PlayOneShot(clip);
         radioFourVoice.PlayOneShot(clip);
     }
+
+    // Only feed sounds reach the receiving radios. Sam remains unable to transmit.
+    public void FeedSound(AudioClip clip, string caption, float volume = 1)
+    {
+        if (state != ChannelState.LibraryFeed && state != ChannelState.LouOpenFeed) return;
+        samVoice.PlayOneShot(clip, volume);
+        if (state == ChannelState.LouOpenFeed) radioFourVoice.PlayOneShot(clip, volume);
+        captions.Show(caption, Mathf.Max(3, clip.length));
+    }
+
+    public void ReactToTest(int index)
+    {
+        if (state != ChannelState.LouOpenFeed || batteryEnding) return;
+        if (index == 0 && reactionsPlayed[0]) index = 1;
+        if (reactionsPlayed[index]) return;
+        reactionsPlayed[index] = true;
+        StartCoroutine(TestReaction(index));
+    }
+
+    IEnumerator TestReaction(int index)
+    {
+        while (busy && !batteryEnding) yield return null;
+        if (state != ChannelState.LouOpenFeed || batteryEnding) yield break;
+        busy = true;
+        yield return TestLine(index, true);
+        busy = false;
+    }
+
+    IEnumerator TestLine(int index, bool lou)
+    {
+        RadioLine line = testLines[index];
+        AudioClip voice = testVoices[index];
+        float duration = Mathf.Max(voice.length, line.text.Length * secondsPerCharacter);
+        Say(line.speaker + " " + line.text, duration);
+        samVoice.PlayOneShot(voice);
+        if (!lou) yield return new WaitForSeconds(echoDelay);
+        radioFourVoice.PlayOneShot(voice);
+        if (!lou) captions.Show("[radio #4: Sam's voice echoes]", duration);
+        yield return new WaitForSeconds(duration);
+    }
+
+    IEnumerator SilentCall()
+    {
+        busy = true;
+        captions.Show("[radio: click]", 2);
+        yield return TestLine(5, false);
+        busy = false;
+    }
+
+    public void LoudTest(AudioClip rattle)
+    {
+        if (state != ChannelState.LouOpenFeed || batteryEnding) return;
+        batteryEnding = true;
+        StartCoroutine(BatteryDies(rattle));
+    }
+
+    IEnumerator BatteryDies(AudioClip rattle)
+    {
+        // Finish any current reaction, then keep the last line uninterrupted.
+        while (busy) yield return null;
+        busy = true;
+        FeedSound(rattle, "[Lou's radio: loud rattle, close]");
+        yield return new WaitForSeconds(rattle.length);
+        yield return TestLine(4, true);
+        GoSilent();
+        controls.PlayOneShot(click);
+        captions.Clear();
+        Say("[click, then silence]", 4);
+    }
+
+    public void GoSilent()
+    {
+        StopAllCoroutines();
+        StopAudio();
+        state = ChannelState.Silent;
+        busy = receiving = breakthrough = talkClickPending = false;
+        batteryEnding = false;
+        rxLight.color = new Color(0.04f, 0.2f, 0.04f);
+        captions.Clear();
+    }
+
+    // Generated clips are owned here and released on leaving Play mode.
+    public AudioClip Placeholder(string role, float seconds, string kind)
+    { return MakeSound(role, seconds, kind); }
 
     void StopAudio()
     {
@@ -323,6 +436,11 @@ public class RadioChannel : MonoBehaviour
                     if (kind == "open") value += noise * Mathf.Max(0, Mathf.Sin(t * 1.6f)) * 0.16f;
                     if (t % 1.3f < 0.1f) value += Mathf.Sin(t * 2 * Mathf.PI * 1100) * Mathf.Exp(-(t % 1.3f) * 35) * 0.25f;
                     break;
+                case "knock": value = (noise * 0.35f + Mathf.Sin(t * 2 * Mathf.PI * 140) * 0.5f) * Mathf.Exp(-t * 35); break;
+                case "clank": value = (Mathf.Sin(t * 2 * Mathf.PI * 670) + Mathf.Sin(t * 2 * Mathf.PI * 1090) * 0.5f + noise * 0.2f) * Mathf.Exp(-t * 7) * 0.45f; break;
+                case "thud": value = (Mathf.Sin(t * 2 * Mathf.PI * 85) + noise * 0.3f) * Mathf.Exp(-t * 9) * 0.6f; break;
+                case "rattle": value = (noise * 0.4f + Mathf.Sin(t * 2 * Mathf.PI * 180) * 0.15f) * Mathf.Max(0, Mathf.Sin(t * 32)); break;
+                case "chime": value = (Mathf.Sin(t * 2 * Mathf.PI * 523) + Mathf.Sin(t * 2 * Mathf.PI * 659) * 0.5f) * Mathf.Exp(-(t % 1) * 2) * 0.3f; break;
                 case "squeal": value = Mathf.Sin(t * 2 * Mathf.PI * 1800) * 0.28f; break;
                 case "click": value = noise * Mathf.Exp(-t * 70) * 0.6f; break;
                 case "scrape": value = noise * 0.3f; break;
