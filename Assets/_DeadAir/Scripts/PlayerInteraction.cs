@@ -13,6 +13,12 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] float reach = 2.5f;
     [SerializeField] PortableRadio portableRadio;
 
+    public bool WithinBangRange(Interactable target, Collider surface)
+    {
+        if (target.Prompt != "E: Bang") return true;
+        return Vector3.Distance(view.transform.position, surface.ClosestPoint(view.transform.position)) <= 1.2f;
+    }
+
     void Update()
     {
         if (!GameScreens.InputAllowed) return;
@@ -34,6 +40,7 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
         if (!target.enabled) return;
+        if (!WithinBangRange(target, hit.collider)) return;
         prompt.text = target.Prompt;
         if (Keyboard.current == null) return;
         bool use = target.HoldE ? Keyboard.current.eKey.isPressed : Keyboard.current.eKey.wasPressedThisFrame;

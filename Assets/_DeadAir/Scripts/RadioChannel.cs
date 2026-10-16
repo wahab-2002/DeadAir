@@ -28,8 +28,12 @@ public class RadioChannel : MonoBehaviour
     readonly string[] lines = { "sam_00", "lou_00", "sam_01", "lou_01", "sam_02", "lou_02", "lou_02b", "lou_03" };
     readonly string[] testLines = { "lou_04", "lou_05", "lou_06", "lou_07", "lou_11", "sam_10" };
     bool[] reactionsPlayed = new bool[7];
+    int previousBand = -1;
+    float nextReaction, nextSameBand;
+    bool reactionPending;
     bool batteryEnding;
     public bool BatteryEnding => batteryEnding;
+    public bool HasTalked { get; private set; }
     readonly List<AudioClip> generated = new List<AudioClip>();
     AudioClip libraryLoop, openLoop, click, releaseHiss, squeal, scrape, cackle, background;
     bool talkHeld, busy, receiving, feedbackPlayed, openWarningShown, breakthrough;
@@ -92,11 +96,11 @@ public class RadioChannel : MonoBehaviour
         talkHeld = held;
         if (searchFeedback != null)
         {
-            float proximity = Mathf.Clamp01(1 - Vector3.Distance(view.position, radioFourVoice.transform.position) / 4);
+            float proximity = Mathf.Clamp01(1 - Vector3.Distance(view.position, radioFourVoice.transform.position) / 2.5f);
             bool whine = state == ChannelState.LibraryFeed && proximity > 0;
             if (whine && !whining) captions.Show("[Your radio whines.]", 3);
             whining = whine;
-            searchFeedback.volume = whine ? proximity * 0.3f : 0;
+            searchFeedback.volume = whine ? proximity * 0.18f : 0;
             searchFeedback.pitch = Mathf.Lerp(0.5f, 1.6f, proximity);
             if (whine && !searchFeedback.isPlaying) searchFeedback.Play();
             if (!whine) searchFeedback.Stop();
@@ -142,6 +146,7 @@ public class RadioChannel : MonoBehaviour
             return;
         }
         talkAccepted = true;
+        HasTalked = true;
         if (state == ChannelState.Silent)
         {
             supplyLift.Talk();
@@ -240,7 +245,7 @@ public class RadioChannel : MonoBehaviour
         else if (nextExchange == 1)
         {
             yield return Speak(5, true);
-            PlayBoth(cackle);
+            PlayBoth(cackle, 0.5012f);
             Say("[muffled cackling]", cackle.length);
             yield return new WaitForSeconds(cackle.length);
             yield return Speak(6, true);
@@ -274,7 +279,7 @@ public class RadioChannel : MonoBehaviour
     {
         receiving = state == ChannelState.LouOpenFeed;
         samFeed.clip = receiving ? openLoop : libraryLoop;
-        samFeed.volume = 0.5f * originalFeedVolume;
+        samFeed.volume = 0.3f * originalFeedVolume;
         samFeed.loop = true;
         samFeed.Play();
         if (receiving)
@@ -306,10 +311,10 @@ public class RadioChannel : MonoBehaviour
         captions.Show(cue, Mathf.Max(1.2f, remaining));
     }
 
-    void PlayBoth(AudioClip clip)
+    void PlayBoth(AudioClip clip, float volume = 1)
     {
-        samVoice.PlayOneShot(clip);
-        radioFourVoice.PlayOneShot(clip);
+        samVoice.PlayOneShot(clip, volume);
+        radioFourVoice.PlayOneShot(clip, volume);
     }
 
     // Only feed sounds reach the receiving radios. Sam remains unable to transmit.
@@ -325,19 +330,44 @@ public class RadioChannel : MonoBehaviour
     public void ReactToTest(int index)
     {
         if (state != ChannelState.LouOpenFeed || batteryEnding) return;
-        if (index != 6 && reactionsPlayed[index]) index = 1;
-        if (index != 6 && reactionsPlayed[index]) return;
+        bool ordinary = index == 2 || index == 4 || index == 5;
+        string line;
+        if (ordinary)
+        {
+            if (index == previousBand)
+            {
+                if (Time.time < nextSameBand) return;
+                line = "lou_05";
+            }
+            else if (previousBand < 0 || index > previousBand)
+                line = index == 2 ? "lou_06" : index == 4 ? "lou_08" : "lou_09";
+            else line = "lou_06";
+            previousBand = index;
+        }
+        else
+        {
+            if (index != 6 && reactionsPlayed[index])
+            {
+                if (reactionsPlayed[1]) return;
+                index = 1;
+            }
+            line = index == 6 ? "lou_10" : testLines[index];
+        }
+        if (reactionPending || IsBusy || Time.time < nextReaction) return;
+        if (line == "lou_05") nextSameBand = Time.time + 30;
         reactionsPlayed[index] = true;
-        StartCoroutine(TestReaction(index));
+        reactionPending = true;
+        StartCoroutine(TestReaction(line));
     }
 
-    IEnumerator TestReaction(int index)
+    IEnumerator TestReaction(string line)
     {
-        while ((busy || voiceLines.Speaking) && !batteryEnding) yield return null;
-        if (state != ChannelState.LouOpenFeed || batteryEnding) yield break;
+        if (state != ChannelState.LouOpenFeed || batteryEnding) { reactionPending = false; yield break; }
         busy = true;
-        yield return voiceLines.Speak(index == 4 ? "lou_08" : index == 5 ? "lou_09" : index == 6 ? "lou_10" : testLines[index], true);
+        yield return voiceLines.Speak(line, true);
+        nextReaction = Time.time + 4;
         busy = false;
+        reactionPending = false;
     }
 
     IEnumerator TestLine(int index, bool lou)

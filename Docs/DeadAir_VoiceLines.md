@@ -12,9 +12,9 @@ Lou's lines always come through a radio. Sam's lines are spoken aloud; when Sam 
 | lou_01 | "Sam?! I've been calling for hours. I hid to jump out at you, and then I was falling, and now it's pitch black. I don't know where I am. My flashlight broke." | Reply to `sam_01`. Dripping and a deep roar behind her. |
 | lou_02 | "Boxes, I think. Sheets. And something laughs every time I move." | Reply to `sam_02`. |
 | lou_02b | "That!" | Right after a muffled cackle that follows `lou_02`. |
-| lou_03 | "My batteries are almost dead. I'm gonna hold the button down so you can hear what I hear. Bang on stuff, Sam. I'll tell you if it's close." | After the next Talk, or 15 s after `lou_02b`. Her feed stays open from here (LouOpenFeed). |
-| lou_04 | "Was that you? I heard it in the pipe... but it's everywhere." | Open feed: the first time Sam bangs a radiator. |
-| lou_05 | "I hear you. Keep going." | Open feed: the first time a noise level whose line already played is heard again. Once per game. |
+| lou_03 | "My battery is almost dead. I'm gonna hold the button down so you can hear what I hear. Bang on stuff, Sam. I'll tell you if it's close." | After the next Talk, or 15 s after `lou_02b`. Her feed stays open from here (LouOpenFeed). |
+| lou_04 | "Was that you? I heard it in the pipes… but it's everywhere." | Open feed: the first time Sam bangs a radiator. |
+| lou_05 | "I hear you, Sam. Keep going." | Open feed: the first time a noise level whose line already played is heard again. Once per game. |
 | lou_06 | "That was far away." | Open feed: the first Far noise. |
 | lou_07 | "The laugh again... no, that one sounded different. Closer." | Open feed: the first time the desk witch cackles. |
 | lou_08 | "Closer... I think." | Open feed: the first Near noise. |

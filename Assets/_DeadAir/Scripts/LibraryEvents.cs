@@ -62,7 +62,7 @@ public class LibraryEvents : MonoBehaviour
         if (radio.BatteryEnding) return;
         if (Time.time >= nextLouWitch && !radio.IsBusy)
         {
-            radio.FeedSound(witch_cackle, "[Lou's radio: cackling laughter]", 0.22f, true);
+            radio.FeedSound(witch_cackle, "[Lou's radio: cackling laughter]", 0.1103f, true);
             nextLouWitch = Time.time + Random.Range(30f, 45f);
         }
         if (!noiseHint && !tested && Time.time - openStarted >= 40 && !radio.IsBusy)
@@ -116,7 +116,7 @@ public class LibraryEvents : MonoBehaviour
         yield return new WaitForSeconds(atTrigger == RadioChannel.ChannelState.LibraryFeed ? 0.2f : 0.5f);
         if (radio.State != atTrigger || radio.BatteryEnding) yield break;
         bool library = atTrigger == RadioChannel.ChannelState.LibraryFeed;
-        radio.FeedSound(witch_cackle, library ? "RADIO: [the same cackle]" : "[Lou's radio: a faint, muffled cackle]", library ? 1 : 0.18f);
+        radio.FeedSound(witch_cackle, library ? "RADIO: [the same cackle]" : "[Lou's radio: a faint, muffled cackle]", library ? 0.5012f : 0.0902f);
         if (!library)
         {
             MarkTest();

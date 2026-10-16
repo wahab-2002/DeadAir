@@ -25,7 +25,9 @@ public class NoiseTestObject : MonoBehaviour
             float distance = Vector3.Distance(transform.position, liftDoor.position);
             if (throughWall && distance <= 2.5f) return 6;
             if (!inPuzzleRoom) return 2;
-            if (distance >= 6) return 4;
+            // Avoid rounding an exact boundary into the closer band.
+            if (distance >= 9 || Mathf.Approximately(distance, 9)) return 2;
+            if (distance >= 5 || Mathf.Approximately(distance, 5)) return 4;
             return 5;
         }
     }
@@ -58,8 +60,10 @@ public class NoiseTestObject : MonoBehaviour
         if (radio.State != RadioChannel.ChannelState.LouOpenFeed || radio.BatteryEnding) yield break;
         int level = Level;
         if (throughWall && level == 6 && wallHintAt < 0) wallHintAt = Time.time + localClip.length + 20;
-        string description = level == 0 ? "a faint pipe knock" : level == 2 ? "faint and muffled" : level == 4 ? "clearer, still not loud" : level == 5 ? "clear and close" : "a clear rustle";
-        radio.FeedSound(localClip, "RADIO: [" + description + "]", level == 0 || level == 2 ? 0.18f : level == 4 ? 0.4f : 0.75f);
+        float distance = Vector3.Distance(transform.position, liftDoor.position);
+        string description = level == 0 ? "a faint pipe knock" : level == 2 ? "a very faint thud" : level == 4 ? "a muffled thud" : level == 5 ? "a clear thud, close to her" : "a clear rustle";
+        float volume = level == 0 ? 0.18f : level == 6 ? 0.75f : !inPuzzleRoom ? 0.08f : Mathf.Lerp(0.08f, 0.75f, Mathf.Clamp01(1 - distance / 9));
+        radio.FeedSound(localClip, "[In Lou's radio: " + description + ".]", volume);
         if (kind == Kind.Radiator) knocks.Reply();
         yield return new WaitForSeconds(localClip.length);
         radio.ReactToTest(level);

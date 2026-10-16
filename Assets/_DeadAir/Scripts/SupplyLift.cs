@@ -157,6 +157,18 @@ public class SupplyLift : MonoBehaviour
         while (!afterCallDone || radio.IsBusy || voices.Speaking) yield return null;
         goalAt = Time.time; yield return voices.Speak("sam_11");
     }
+    public void ShowLou()
+    {
+        bool visible = LouInside && AtTop && door.IsOpen && !door.IsMoving;
+        foreach (Renderer part in lou.GetComponentsInChildren<Renderer>(true)) part.enabled = visible;
+    }
+
+    void LateUpdate()
+    {
+        if (endingStarted) return;
+        ShowLou();
+    }
+
     public void DoorOpened()
     {
         if (LouInside && AtTop && !endingStarted)
@@ -193,12 +205,12 @@ public class SupplyLift : MonoBehaviour
         }
         if (BeaconStage == 1)
         {
-            shaft.PlayOneShot(witch_cackle, 0.25f); captions.Show("[distant witch cackle, below]", 3);
+            shaft.PlayOneShot(witch_cackle, 0.1253f); captions.Show("[distant witch cackle, below]", 3);
             yield return new WaitForSeconds(witch_cackle.length);
         }
         if (LouInside)
         {
-            lou.gameObject.SetActive(true); lou.localScale = Vector3.one * 0.7f;
+            lou.gameObject.SetActive(true);
             portable.PlaceInCar(louRadioMount);
         }
         while (voices.Speaking) yield return null;

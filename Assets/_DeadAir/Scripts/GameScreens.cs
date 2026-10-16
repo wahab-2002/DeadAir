@@ -14,6 +14,12 @@ public class GameScreens : MonoBehaviour
     public static bool Started { get; private set; }
     public static bool Paused { get; private set; }
     public static bool InputAllowed { get; private set; }
+    [SerializeField] GameObject radioHint;
+    [SerializeField] RadioChannel radio;
+    [SerializeField] CanvasGroup storyCard;
+    [SerializeField] TMPro.TMP_Text storyPrompt;
+    bool storyReady, continueStory;
+    float gameplayAt;
     bool fading, ended, previousMovementLock;
 
     void Awake()
@@ -23,6 +29,8 @@ public class GameScreens : MonoBehaviour
         title.gameObject.SetActive(true); title.alpha = 1;
         pause.gameObject.SetActive(false); credits.gameObject.SetActive(false);
         hud.SetActive(false); movement.Locked = true;
+        radioHint.SetActive(false);
+        storyCard.gameObject.SetActive(false);
     }
     void Start()
     {
@@ -33,6 +41,8 @@ public class GameScreens : MonoBehaviour
     }
     void Update()
     {
+        radioHint.SetActive(Started && InputAllowed && !ended && !ending.Finished && !radio.HasTalked && Time.time - gameplayAt >= 5);
+        if (storyReady && Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame) ContinueStory();
         if (!Started || fading || ended || ending.Finished) return;
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
@@ -41,18 +51,34 @@ public class GameScreens : MonoBehaviour
     }
     public void StartGame()
     {
-        if (Started) return;
-        Started = true; Time.timeScale = 1;
+        if (Started || fading) return;
+        fading = true;
         titleHiss.Stop(); StartCoroutine(FadeTitle());
     }
     IEnumerator FadeTitle()
     {
-        fading = true; title.interactable = false;
+        title.interactable = false;
+        storyCard.gameObject.SetActive(true); storyCard.alpha = 0; storyPrompt.text = "";
         for (float t = 0; t < 1; t += Time.unscaledDeltaTime)
-        { title.alpha = 1 - t; yield return null; }
-        title.gameObject.SetActive(false); hud.SetActive(true);
+        { title.alpha = 1 - t; storyCard.alpha = t; yield return null; }
+        title.gameObject.SetActive(false); storyCard.alpha = 1;
+        yield return new WaitForSecondsRealtime(4);
+        storyPrompt.text = "Press any key"; storyReady = true;
+        while (!continueStory) yield return null;
+        storyReady = false;
+        // Scaled time stays frozen through the card and the fade into Room 12.
+        for (float t = 0; t < 1; t += Time.unscaledDeltaTime)
+        { storyCard.alpha = 1 - t; yield return null; }
+        storyCard.gameObject.SetActive(false); hud.SetActive(true);
+        Started = true; Time.timeScale = 1;
+        gameplayAt = Time.time;
         movement.Locked = false; InputAllowed = true; fading = false; SetCursor(false);
     }
+    public void ContinueStory()
+    {
+        if (storyReady) continueStory = true;
+    }
+
     public void Pause()
     {
         if (!Started || fading || ended || Paused) return;

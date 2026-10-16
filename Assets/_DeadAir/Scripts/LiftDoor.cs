@@ -74,7 +74,6 @@ public class LiftDoor : MonoBehaviour
         if (!revealed || moving || !supplyLift.AtTop) return;
         DoorTouched = true;
         open = !open;
-        if (open) supplyLift.DoorOpened();
         doorInteraction.SetPrompt(open ? "E: Close" : "E: Open");
         Rattle("[the small door rattles]");
         StartCoroutine(MoveDoor());
@@ -86,6 +85,11 @@ public class LiftDoor : MonoBehaviour
         // A sliding placeholder hatch keeps the tiny opening clear.
         yield return Slide(door, closedPosition + (open ? door.right * 0.7f + door.forward * 0.18f : Vector3.zero));
         moving = false;
+        if (open)
+        {
+            supplyLift.ShowLou();
+            supplyLift.DoorOpened();
+        }
     }
 
     IEnumerator Slide(Transform target, Vector3 end)
