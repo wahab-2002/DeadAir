@@ -4,6 +4,7 @@ using TMPro;
 
 public class LiftEnding : MonoBehaviour
 {
+    [SerializeField] BackgroundMusic music;
     [SerializeField] FirstPersonController movement;
     [SerializeField] PlayerInteraction interaction;
     [SerializeField] RadioChannel radio;
@@ -24,7 +25,7 @@ public class LiftEnding : MonoBehaviour
         movement.Locked = true; interaction.enabled = false; radio.enabled = false; library.enabled = false;
         library.StopAllCoroutines();
         foreach (SchoolClock clock in FindObjectsByType<SchoolClock>(FindObjectsSortMode.None)) clock.enabled = false;
-        foreach (AudioSource source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None)) source.Stop();
+        foreach (AudioSource source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None)) if (source.GetComponent<BackgroundMusic>() == null) source.Stop();
         StartCoroutine(Ending());
     }
     IEnumerator Ending()
@@ -78,7 +79,7 @@ public class LiftEnding : MonoBehaviour
         yield return new WaitForSeconds(0.5f); yield return voices.Speak("lou_14", true);
         yield return new WaitForSeconds(0.5f); yield return voices.Speak("sam_15");
         knocks.StopForever();
-        foreach (AudioSource source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None)) source.Stop();
+        foreach (AudioSource source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None)) if (source.GetComponent<BackgroundMusic>() == null) source.Stop();
         library.StopAllCoroutines(); radio.StopAllCoroutines();
         roomTone.clip = radio.Placeholder("faint_room_tone", 4, "hiss"); roomTone.loop = true; roomTone.volume = 0.025f; roomTone.Play();
         captions.Clear(); captions.Show("[In the walls, the pipes go quiet.]\n[faint room tone]", 4);

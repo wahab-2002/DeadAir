@@ -18,6 +18,7 @@ public class RadioChannel : MonoBehaviour
     [SerializeField] AudioSource samVoice;
     [SerializeField] AudioSource samFeed;
     [SerializeField] AudioSource controls;
+    [SerializeField] AudioSource crateSound;
     [SerializeField] AudioSource radioFourVoice;
     [SerializeField] AudioSource radioFourFeed;
     [SerializeField] UnityEngine.UI.Image txLight;
@@ -44,7 +45,7 @@ public class RadioChannel : MonoBehaviour
     public ChannelState State => state;
     public bool IsBusy => busy || voiceLines.Speaking;
     [SerializeField] AudioSource searchFeedback;
-    bool whining, talkAccepted;
+    bool whining, talkAccepted, warnedFeedback;
     string warnedLine;
 
     float originalFeedVolume;
@@ -94,7 +95,9 @@ public class RadioChannel : MonoBehaviour
         if (held && !talkHeld) BeginTalk();
         if (!held && talkHeld) EndTalk();
         talkHeld = held;
-        if (searchFeedback != null)
+        if (searchFeedback == null && !warnedFeedback)
+        { warnedFeedback = true; Debug.LogWarning("RadioChannel: optional search feedback source missing; radio continues without whine.", this); }
+        if (searchFeedback != null && radioFourVoice != null)
         {
             float proximity = Mathf.Clamp01(1 - Vector3.Distance(view.position, radioFourVoice.transform.position) / 2.5f);
             bool whine = state == ChannelState.LibraryFeed && proximity > 0;
@@ -200,7 +203,7 @@ public class RadioChannel : MonoBehaviour
     {
         if (slideSeconds > 0)
         {
-            controls.PlayOneShot(scrape);
+            if (crateSound != null) crateSound.PlayOneShot(scrape);
             Say("[crate slides aside]", slideSeconds);
             yield return new WaitForSeconds(slideSeconds);
         }
@@ -424,6 +427,7 @@ public class RadioChannel : MonoBehaviour
     void StopAudio()
     {
         samVoice.Stop(); samFeed.Stop(); controls.Stop();
+        if (crateSound != null) crateSound.Stop();
         radioFourVoice.Stop(); radioFourFeed.Stop();
     }
 

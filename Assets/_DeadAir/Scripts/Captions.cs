@@ -16,7 +16,7 @@ public class Captions : MonoBehaviour
     public void NewRoomVisit() { ambient.Clear(); }
     public void Ambient(string text, float seconds)
     {
-        if (Time.time < dialogueUntil || ambient.Contains(text)) return;
+        if (!GameScreens.Started || Time.time < dialogueUntil || ambient.Contains(text)) return;
         ambient.Add(text); Show(text, seconds);
     }
     public void Dialogue(string text, float seconds)

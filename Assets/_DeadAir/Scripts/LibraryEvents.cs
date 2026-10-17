@@ -14,6 +14,7 @@ public class LibraryEvents : MonoBehaviour
     [SerializeField] Captions captions;
     [SerializeField] LiftDoor lift;
     [SerializeField] AudioClip witch_cackle, clock_chime;
+    bool warnedAquarium;
     float nextAquariumCaption;
     [SerializeField] Transform aquarium;
     float started, entered = -1, openStarted = -1, nextWitch, nextLouWitch;
@@ -34,6 +35,8 @@ public class LibraryEvents : MonoBehaviour
 
     void Update()
     {
+        if (aquarium == null && !warnedAquarium)
+        { warnedAquarium = true; Debug.LogWarning("LibraryEvents: aquarium caption location is missing; other events continue.", this); }
         if (!GameScreens.Started || GameScreens.Paused || witch_cackle == null) return;
 #if UNITY_EDITOR
         if (Keyboard.current != null && Keyboard.current.f5Key.wasPressedThisFrame) Chime();

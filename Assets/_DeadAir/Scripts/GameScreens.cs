@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 [DefaultExecutionOrder(-1000)]
 public class GameScreens : MonoBehaviour
 {
+    [SerializeField] BackgroundMusic music;
     [SerializeField] CanvasGroup title, pause, credits;
     [SerializeField] GameObject hud;
     [SerializeField] FirstPersonController movement;
@@ -35,7 +36,7 @@ public class GameScreens : MonoBehaviour
     void Start()
     {
         SetCursor(true);
-        foreach (AudioSource source in FindObjectsByType<AudioSource>(FindObjectsInactive.Include, FindObjectsSortMode.None)) source.Stop();
+        foreach (AudioSource source in FindObjectsByType<AudioSource>(FindObjectsInactive.Include, FindObjectsSortMode.None)) if (source.GetComponent<BackgroundMusic>() == null) source.Stop();
         titleHiss.clip = FindFirstObjectByType<RadioChannel>().Placeholder("faint_room_tone", 4, "hiss");
         titleHiss.volume = 0.025f; titleHiss.loop = true; titleHiss.Play();
     }
@@ -97,6 +98,7 @@ public class GameScreens : MonoBehaviour
     }
     public IEnumerator ShowCredits()
     {
+        music.Credits();
         ended = true; InputAllowed = false; movement.Locked = true;
         credits.alpha = 0; credits.gameObject.SetActive(true); SetCursor(true);
         for (float t = 0; t < 1; t += Time.unscaledDeltaTime)

@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 
 public class SupplyLift : MonoBehaviour
 {
+    [SerializeField] BackgroundMusic music;
     [SerializeField] RadioChannel radio;
     [SerializeField] VoiceLines voices;
     [SerializeField] Captions captions;
@@ -15,6 +16,15 @@ public class SupplyLift : MonoBehaviour
     [SerializeField] Transform player, view;
     [SerializeField] AudioSource rope, shaft, carSound, boiler, aquarium;
     [SerializeField] AudioClip lift_creak, lift_clunk, shaft_knock, witch_cackle;
+    bool warnedAudio;
+    void CheckOptionalAudio()
+    {
+        if (!warnedAudio && (rope == null || shaft == null || carSound == null || boiler == null || aquarium == null || music == null))
+        {
+            warnedAudio = true;
+            Debug.LogWarning("SupplyLift: an optional audio reference is missing; the lift will continue without that sound.", this);
+        }
+    }
     Vector3 top;
     float travel, direction = 1, lastCrank = -10, emptyAt = -1, goalAt = -1, nextAmbientCaption;
     bool afterCallDone, endpointWait;
@@ -34,15 +44,16 @@ public class SupplyLift : MonoBehaviour
     System.Collections.IEnumerator Start()
     {
         while (!GameScreens.Started) yield return null;
+        CheckOptionalAudio();
         top = car.position;
         lou.gameObject.SetActive(false);
         if (lift_creak == null) lift_creak = radio.Placeholder("lift_creak", 1, "rattle");
         if (lift_clunk == null) lift_clunk = radio.Placeholder("lift_clunk", 0.45f, "thud");
         if (shaft_knock == null) shaft_knock = radio.Placeholder("pipe_knock", 0.7f, "clank");
         if (witch_cackle == null) witch_cackle = radio.Placeholder("witch_cackle", 1.2f, "cackle");
-        rope.clip = lift_creak; rope.loop = true;
-        boiler.clip = radio.Placeholder("boiler_roar_drip", 8, "background"); boiler.loop = true; boiler.Play();
-        aquarium.clip = radio.Placeholder("aquarium_bubbling", 8, "library"); aquarium.loop = true; aquarium.volume = 0.08f; aquarium.Play();
+        if (rope != null) { rope.clip = lift_creak; rope.loop = true; }
+        if (boiler != null) { boiler.clip = radio.Placeholder("boiler_roar_drip", 8, "background"); boiler.loop = true; boiler.Play(); }
+        if (aquarium != null) { aquarium.clip = radio.Placeholder("aquarium_bubbling", 8, "library"); aquarium.loop = true; aquarium.volume = 0.08f; aquarium.Play(); }
 #if UNITY_EDITOR
         if (requestedShortcut != 0) StartCoroutine(ApplyShortcut());
 #endif
@@ -50,6 +61,7 @@ public class SupplyLift : MonoBehaviour
 
     void Update()
     {
+        CheckOptionalAudio();
         if (!GameScreens.Started || GameScreens.Paused) return;
 #if UNITY_EDITOR
         if (Keyboard.current != null)
@@ -62,7 +74,7 @@ public class SupplyLift : MonoBehaviour
             }
         }
 #endif
-        if (lastCrank < Time.frameCount - 1) { endpointWait = false; if (rope.isPlaying) rope.Stop(); }
+        if (lastCrank < Time.frameCount - 1) { endpointWait = false; if (rope != null && rope.isPlaying) rope.Stop(); }
         if (dead && door.IsOpen && !goal) StartCoroutine(Goal());
         if (goalAt >= 0 && !hint4 && !movedSinceGoal && Time.time - goalAt >= 15 && !voices.Speaking)
         { hint4 = true; voices.Say("sam_h4"); }
@@ -76,7 +88,7 @@ public class SupplyLift : MonoBehaviour
         if (!endingStarted && Time.time >= nextAmbientCaption)
         {
             nextAmbientCaption = Time.time + 15;
-            if (Vector3.Distance(view.position, shaft.transform.position) < boiler.maxDistance && boiler.volume > 0.01f)
+            if (shaft != null && boiler != null && Vector3.Distance(view.position, shaft.transform.position) < boiler.maxDistance && boiler.volume > 0.01f)
                 captions.Ambient("[faint boiler roar and dripping, below the shaft]", 4);
 
         }
@@ -120,18 +132,18 @@ public class SupplyLift : MonoBehaviour
         if (door.IsOpen) { door.CloseForCrank(); return; }
         if (door.IsMoving) return;
         if (LouInside && direction < 0 && !heavyCaption)
-        { heavyCaption = true; captions.Show("[The crank is heavy now.]", 4);
+        { if (music != null) music.BeforeScare(); heavyCaption = true; captions.Show("[The crank is heavy now.]", 4);
             captions.Show("[The boiler roar and dripping fade; aquarium bubbling returns.]", 7); }
-        if (!rope.isPlaying) { rope.Play(); captions.Show("[rope creaks]", 3); }
+        if (rope != null && !rope.isPlaying) { rope.Play(); captions.Show("[rope creaks]", 3); }
         if (Time.frameCount % 90 == 0) captions.Show("[rope creaks]", 2);
         travel = Mathf.Clamp01(travel + direction * Time.deltaTime / (LouInside && direction < 0 ? 7 : 4));
         car.position = top + Vector3.down * (3 * travel);
         crank.Rotate(0, 0, direction * 150 * Time.deltaTime, Space.Self);
         if (goal) movedSinceGoal = true;
-        if (LouInside) { boiler.volume = 0.22f * travel; aquarium.volume = Mathf.Lerp(0.35f, 0.08f, travel); }
+        if (LouInside) { if (boiler != null) boiler.volume = 0.22f * travel; if (aquarium != null) aquarium.volume = Mathf.Lerp(0.35f, 0.08f, travel); }
         if ((direction > 0 && AtBottom) || (direction < 0 && AtTop))
         {
-            rope.Stop(); carSound.PlayOneShot(lift_clunk); captions.Show("[lift clunks to a stop]", 3);
+            if (rope != null) rope.Stop(); if (carSound != null) carSound.PlayOneShot(lift_clunk); captions.Show("[lift clunks to a stop]", 3);
             if (AtBottom && !portable.InCar && emptyAt < 0) emptyAt = Time.time;
             direction = -direction; endpointWait = true;
         }
@@ -173,7 +185,7 @@ public class SupplyLift : MonoBehaviour
     {
         if (LouInside && AtTop && !endingStarted)
         {
-            endingStarted = true; rope.Stop(); ending.Begin();
+            endingStarted = true; if (rope != null) rope.Stop(); ending.Begin();
         }
     }
     public void Talk()
@@ -200,12 +212,13 @@ public class SupplyLift : MonoBehaviour
         captions.Show(BeaconStage == 1 ? "[Three knocks, from somewhere below.]" : BeaconStage == 2 ? "[Three knocks. Closer.]" : "[One knock, right on the car. YES.]", 4);
         for (int i = 0; i < (BeaconStage == 3 ? 1 : 3); i++)
         {
-            (BeaconStage == 3 ? carSound : shaft).PlayOneShot(shaft_knock, BeaconStage == 1 ? 0.35f : BeaconStage == 2 ? 0.65f : 1);
+            AudioSource knockSource = BeaconStage == 3 ? carSound : shaft;
+            if (knockSource != null) knockSource.PlayOneShot(shaft_knock, BeaconStage == 1 ? 0.35f : BeaconStage == 2 ? 0.65f : 1);
             yield return new WaitForSeconds(0.4f);
         }
         if (BeaconStage == 1)
         {
-            shaft.PlayOneShot(witch_cackle, 0.1253f); captions.Show("[distant witch cackle, below]", 3);
+            if (shaft != null) shaft.PlayOneShot(witch_cackle, 0.1253f); captions.Show("[distant witch cackle, below]", 3);
             yield return new WaitForSeconds(witch_cackle.length);
         }
         if (LouInside)

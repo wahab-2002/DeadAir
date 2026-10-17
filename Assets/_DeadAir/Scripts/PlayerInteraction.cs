@@ -13,6 +13,7 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] float reach = 2.5f;
     [SerializeField] PortableRadio portableRadio;
 
+    bool warnedPortable;
     public bool WithinBangRange(Interactable target, Collider surface)
     {
         if (target.Prompt != "E: Bang") return true;
@@ -21,6 +22,8 @@ public class PlayerInteraction : MonoBehaviour
 
     void Update()
     {
+        if (portableRadio == null && !warnedPortable)
+        { warnedPortable = true; Debug.LogWarning("PlayerInteraction: optional portable radio reference missing; other interactions continue.", this); }
         if (!GameScreens.InputAllowed) return;
         prompt.text = "";
         dot.SetActive(!notes.IsOpen);

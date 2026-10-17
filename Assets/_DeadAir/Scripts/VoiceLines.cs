@@ -14,6 +14,8 @@ public class VoiceLines : MonoBehaviour
     }
     [SerializeField] RadioChannel radio;
     [SerializeField] Captions captions;
+    [SerializeField] RadioVoiceSettings settings;
+    [SerializeField] AudioRouting audioRouting;
     [SerializeField] AudioSource localVoice, radioVoice;
     public List<Line> lines = new List<Line>
     {
@@ -65,9 +67,7 @@ public class VoiceLines : MonoBehaviour
     public Line Find(string id) { return lines.Find(line => line.id == id); }
     public AudioClip Clip(string id)
     {
-        Line line = Find(id);
-        if (line.clip == null) line.clip = radio.Placeholder(id, Mathf.Max(1.2f, line.caption.Length * 0.06f), "voice");
-        return line.clip;
+        return Find(id).clip;
     }
     public IEnumerator Speak(string id, bool transmit = false)
     {
@@ -76,15 +76,22 @@ public class VoiceLines : MonoBehaviour
         CurrentId = id;
         Line line = Find(id);
         AudioClip clip = Clip(id);
-        float duration = Mathf.Max(clip.length, line.caption.Length * 0.06f);
+        float duration = clip == null ? 1 + 0.07f * line.caption.Length : clip.length;
+        bool lou = id.StartsWith("lou_");
         Played.Add(id);
-        captions.Dialogue((id.StartsWith("lou_") ? "LOU (radio): " : "SAM: ") + line.caption, duration + 1);
-        localVoice.PlayOneShot(clip);
-        if (transmit || id.StartsWith("lou_")) radioVoice.PlayOneShot(clip);
+        captions.Dialogue((id.StartsWith("lou_") ? "LOU (radio): " : "SAM: ") + line.caption, duration);
+        if (clip != null)
+        {
+            if (audioRouting != null) { audioRouting.Voice(localVoice, lou); audioRouting.Voice(radioVoice, lou); }
+            settings.Begin(lou, transmit);
+            localVoice.PlayOneShot(clip);
+            if (transmit || lou) radioVoice.PlayOneShot(clip);
+        }
         yield return new WaitForSeconds(duration);
+        if (clip != null) settings.End(lou);
         if (id.StartsWith("lou_")) TalkAllowedAt = Time.time + 1.5f;
         Speaking = false;
     }
-    public void Cancel() { StopAllCoroutines(); Speaking = false; }
+    public void Cancel() { StopAllCoroutines(); settings.Cancel(); Speaking = false; }
     public void Say(string id) { StartCoroutine(Speak(id)); }
 }
