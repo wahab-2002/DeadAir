@@ -91,7 +91,7 @@ public class LiftEnding : MonoBehaviour
             elapsed += Time.deltaTime; black.color = new Color(0, 0, 0, Mathf.Clamp01(elapsed / 2)); yield return null;
         }
         hud.SetActive(false);
-        endText.text = "Neither of them chickened out."; yield return new WaitForSeconds(3);
+        endText.text = "Over and out."; yield return new WaitForSeconds(3);
         endText.text = "DEAD AIR"; Finished = true;
         yield return new WaitForSeconds(3);
         yield return FindFirstObjectByType<GameScreens>().ShowCredits();

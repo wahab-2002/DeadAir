@@ -225,9 +225,18 @@ public class SupplyLift : MonoBehaviour
         {
             lou.gameObject.SetActive(true);
             portable.PlaceInCar(louRadioMount);
+            HideCarProp(pail);
+            HideCarProp(portable.transform);
         }
         while (voices.Speaking) yield return null;
         beaconBusy = false;
+    }
+
+    void HideCarProp(Transform prop)
+    {
+        // Leave the object and its audio active for the final radio lines.
+        foreach (Renderer part in prop.GetComponentsInChildren<Renderer>(true)) part.enabled = false;
+        foreach (Collider part in prop.GetComponentsInChildren<Collider>(true)) part.enabled = false;
     }
 #if UNITY_EDITOR
     public void RestartForTest(bool ready)

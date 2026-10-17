@@ -51,7 +51,7 @@ Lou's lines always come through a radio. Sam's lines are spoken aloud; when Sam 
 | ID | Line | When it plays |
 | --- | --- | --- |
 | sam_h1 | "Something's glowing under that crate." | 45 s in the library without lifting the real crate. |
-| sam_h2 | "If she's holding the button, anything loud near her should come through." | 40 s into the open feed with no noise made. |
+| sam_h2 | "If she’s holding that button, anything loud near her should come through." | 40 s into the open feed with no noise made. |
 | sam_h3 | "She said she fell. Fell from where?" | 80 s into the open feed with the lift not touched. |
 | sam_h4 | "The crank... I could send the lift down to her." | 15 s after `sam_11` if the car hasn't moved. |
 | sam_h5 | "She can't see it. It's pitch black down there." | 20 s after the empty car first reaches the bottom. |
@@ -64,5 +64,5 @@ Hints `sam_h5`–`sam_h7` stop once the beacon has started.
 ## Not spoken (on-screen text only)
 
 - "[In the walls, the pipes go quiet.]"
-- "Neither of them chickened out."
+- "Over and out."
 - "DEAD AIR"

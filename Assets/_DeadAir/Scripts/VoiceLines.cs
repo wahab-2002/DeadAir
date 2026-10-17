@@ -52,7 +52,7 @@ public class VoiceLines : MonoBehaviour
         new Line("sam_14", "Climb in. I'll pull you up."),
         new Line("sam_15", "Yeah. It was you."),
         new Line("sam_h1", "Something's glowing under that crate."),
-        new Line("sam_h2", "If she's holding the button, anything loud near her should come through."),
+        new Line("sam_h2", "If she’s holding that button, anything loud near her should come through."),
         new Line("sam_h3", "She said she fell. Fell from where?"),
         new Line("sam_h4", "The crank... I could send the lift down to her."),
         new Line("sam_h5", "She can't see it. It's pitch black down there."),

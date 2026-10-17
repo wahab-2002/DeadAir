@@ -82497,28 +82497,24 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'DEAD AIR
 
-    A game by Wahab Ahmed
+    A game by Abdul Wahab Ahmed
 
 
-    Voices
-
-    Lou: Maryam
-
-    Sam:
-    Nausherwan
+    Voices: Maryam (Lou and
+    Sam)
 
 
     Sound effects synthesized for this project
 
-    Lou''s ghost
-    model made for this project
+    Lou''s ghost model
+    made for this project
 
 
-    Music: original ambient score made for this
-    project
+    Music: original ambient score made for this project
 
 
-    Made with Unity 6.3'
+    Made
+    with Unity 6.3'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -90623,73 +90619,74 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 594d8c5340a17430abb25958b3a52b7e, type: 3}
     caption: Did you get the Knocking Ghost on tape?
   - id: sam_00
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 233b18286cf5945b5b2fa035f577744b, type: 3}
     caption: Lou? I fell asleep. Are you there? Over.
   - id: sam_01
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 124549a5b591844428bdc295031db129, type: 3}
     caption: Lou! It's me! I fell asleep. Where are you?
   - id: sam_02
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: be65c378107094e88aa67047c1ba90d9, type: 3}
     caption: What's down there with you?
   - id: sam_03
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: f3a86695281a44d109cd3bd2ddefcb07, type: 3}
     caption: She can't hear me while she's holding it.
   - id: sam_04
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: e9169d33941e94fcd9d40213e8cca561, type: 3}
     caption: Not without Lou.
   - id: sam_05
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: fe6a5b57147a6473d92411183bb5c9c2, type: 3}
     caption: Just pumpkin bread.
   - id: sam_06
     clip: {fileID: 0}
     caption: Just a wall.
   - id: sam_07
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d9096f2c9971e42f8bc910180e6e9d3b, type: 3}
     caption: Mom's PTA radio. It was stuck on talk the whole time.
   - id: sam_08
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 39767b09e9cb944fc80c198124448511, type: 3}
     caption: Lou's candy pail. She was in here.
   - id: sam_09
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d657e5f0daa064afaa0e0a0c9750018d, type: 3}
     caption: If I go down too, there's nobody to crank us back up.
   - id: sam_10
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: cd36d30ff8646449694cc2b63baea0b4, type: 3}
     caption: Lou? Lou, can you hear me?
   - id: sam_11
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 6a4e92802ae9c4baea3e3bbcfddaff8a, type: 3}
     caption: She's at the bottom of that lift. I have to get her up.
   - id: sam_12
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 45b176117376846da87dd6b7f93d0a2c, type: 3}
     caption: Lou! The cupboard's back! Follow my voice!
   - id: sam_13
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 87df0a94810db42cea8b3ff0c6773be1, type: 3}
     caption: Keep coming! You're close!
   - id: sam_14
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 7582cf52cb1d247569f76b5a46acdb65, type: 3}
     caption: Climb in. I'll pull you up.
   - id: sam_15
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 0352c494a597b417b939cd81d3c54919, type: 3}
     caption: Yeah. It was you.
   - id: sam_h1
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 5a7442ba24d994c9ba225c2fb4d0720f, type: 3}
     caption: Something's glowing under that crate.
   - id: sam_h2
-    clip: {fileID: 0}
-    caption: If she's holding the button, anything loud near her should come through.
+    clip: {fileID: 8300000, guid: 4eae381b82dff4319af731220c71733c, type: 3}
+    caption: "If she\u2019s holding that button, anything loud near her should come
+      through."
   - id: sam_h3
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: c04c7a1bc52264a6e9ff8e119ffb1069, type: 3}
     caption: She said she fell. Fell from where?
   - id: sam_h4
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: ef348d241c6234d4484f47fde5a8de43, type: 3}
     caption: The crank... I could send the lift down to her.
   - id: sam_h5
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d62c44b0476424066901d5ccaca9e2eb, type: 3}
     caption: She can't see it. It's pitch black down there.
   - id: sam_h6
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: f4fef200a275c4f088e77567e5b9031c, type: 3}
     caption: She needs something to follow.
   - id: sam_h7
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 3a6cee6f30d8e41d48eb447fb0848ceb, type: 3}
     caption: The PTA radio... if she could hear me down there.
   - id: sam_h8
     clip: {fileID: 0}
